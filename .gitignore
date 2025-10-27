@@ -4,6 +4,7 @@ venv/
 .venv/
 
 optimal.venv/
+optimal/
 
 # Fichiers de base de données
 db.sqlite3
