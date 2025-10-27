@@ -6,17 +6,28 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import vosk
 import sounddevice as sd
+import difflib
 import json
 import os
 from django.conf import settings
 from django.core.files.storage import default_storage
 
-# Command mapping
+
+COMMAND_SYNONYMS = {
+	"lock doors": ["lock the doors", "secure doors", "close doors", "shut doors"],
+	"unlock doors": ["unlock the doors", "open doors", "release doors"],
+	"trigger alarm": ["activate alarm", "sound alarm", "start alarm"],
+	"disarm alarm": ["disable alarm", "turn off alarm", "stop alarm"],
+	"open garage": ["open the garage", "raise garage door", "garage up"],
+	"turn on lights": ["switch on lights", "lights on", "illuminate room", "turn the lights on"],
+}
 COMMAND_ACTIONS = {
 	"lock doors": "Doors locked.",
 	"trigger alarm": "Alarm triggered!",
 	"unlock doors": "Doors unlocked.",
 	"disarm alarm": "Alarm disarmed.",
+	"open garage": "Garage opened.",
+	"turn on lights": "Lights turned on.",
 }
 
 MODEL_PATH = os.path.join(settings.BASE_DIR, "voicecontrol", "vosk-model-small-en-us-0.15")
@@ -98,13 +109,34 @@ def voice_command(request):
 			response["action"] = ""
 		else:
 			response["recognized"] = command_text
-			for cmd, action in COMMAND_ACTIONS.items():
-				if cmd in command_text.lower():
-					response["action"] = action
+			text = command_text.lower()
+			found = False
+			# Fuzzy match against synonyms
+			for cmd, synonyms in COMMAND_SYNONYMS.items():
+				for phrase in [cmd] + synonyms:
+					ratio = difflib.SequenceMatcher(None, phrase, text).ratio()
+					if ratio > 0.7 or phrase in text:
+						response["action"] = COMMAND_ACTIONS[cmd]
+						found = True
+						break
+				if found:
 					break
-			else:
-				response["action"] = "No valid command detected."
-		
+			if not found:
+				# Fallback to keyword logic
+				if "unlock" in text and "door" in text:
+					response["action"] = COMMAND_ACTIONS["unlock doors"]
+				elif "lock" in text and "door" in text:
+					response["action"] = COMMAND_ACTIONS["lock doors"]
+				elif "trigger" in text and "alarm" in text:
+					response["action"] = COMMAND_ACTIONS["trigger alarm"]
+				elif "disarm" in text and "alarm" in text:
+					response["action"] = COMMAND_ACTIONS["disarm alarm"]
+				elif "open" in text and "garage" in text:
+					response["action"] = COMMAND_ACTIONS["open garage"]
+				elif ("turn on" in text or "switch on" in text) and "light" in text:
+					response["action"] = COMMAND_ACTIONS["turn on lights"]
+				else:
+					response["action"] = "No valid command detected."
 		return JsonResponse(response)
 	return JsonResponse({"error": "Invalid request."}, status=400)
 

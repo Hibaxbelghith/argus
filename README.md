@@ -1,7 +1,24 @@
 # Argus: Plateforme de Sécurité Personnalisée
 
+
 ## Project Overview
-Argus is an intelligent surveillance platform that integrates facial recognition, object/person detection, movement detection, speech-to-text command control, and alert anomaly detection.
+Argus is an intelligent surveillance platform that integrates facial recognition, object/person detection, movement detection, and voice command detection for security actions.
+
+## Voice Command Detection
+You can control security actions (e.g., lock doors, trigger alarm, open garage, turn on lights) using natural voice commands.
+
+### Demo
+- Go to `/voicecontrol/demo/` in your browser.
+- Click "Start Recording" and speak a command (e.g., "Can you please lock the doors?").
+- Click "Stop & Send" to process your command and see the result.
+
+Supported actions include:
+- Lock/unlock doors
+- Trigger/disarm alarm
+- Open garage
+- Turn on lights
+
+Flexible command detection supports synonyms and natural phrases.
 
 ## Quick Setup Guide
 

@@ -1,25 +1,87 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Voice Command Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f7f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            margin-top: 2rem;
+            color: #222;
+        }
+        .controls {
+            margin: 2rem 0 1rem 0;
+            display: flex;
+            gap: 1rem;
+        }
+        button {
+            padding: 0.7rem 1.5rem;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            border: none;
+            background: #4f8cff;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:active {
+            background: #2c5fcf;
+        }
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1rem 2rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            min-width: 250px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        .recording {
+            color: #e53935;
+            font-weight: bold;
+            animation: blink 1s steps(2, start) infinite;
+        }
+        @keyframes blink {
+            to { visibility: hidden; }
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 1.3rem; }
+            button { font-size: 1rem; padding: 0.5rem 1rem; }
+            .feedback { font-size: 1rem; padding: 0.7rem 1rem; }
+        }
+    </style>
     <script>
         let mediaRecorder;
         let audioChunks = [];
         let stream;
+        let isRecording = false;
 
         async function startRecording() {
+            if (isRecording) return;
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
-                
+                isRecording = true;
+                document.getElementById('result').innerHTML = '<span class="recording">● Recording...</span>';
+
                 mediaRecorder.ondataavailable = (event) => {
                     audioChunks.push(event.data);
                 };
-                
+
                 mediaRecorder.start();
-                document.getElementById('result').innerText = 'Recording...';
             } catch (err) {
                 document.getElementById('result').innerText = 'Error: ' + err.message;
             }
@@ -30,74 +92,39 @@
                 document.getElementById('result').innerText = 'No active recording';
                 return;
             }
-            
+            isRecording = false;
             mediaRecorder.onstop = async () => {
-                // Stop the microphone stream
                 stream.getTracks().forEach(track => track.stop());
-                
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                 const formData = new FormData();
                 formData.append('audio', audioBlob, 'command.webm');
-                
-                document.getElementById('result').innerText = 'Processing...';
-                
+                document.getElementById('result').innerHTML = '<span>Processing...</span>';
                 try {
                     const response = await fetch('/voicecontrol/voice-command/', {
                         method: 'POST',
                         body: formData
                     });
-                    
                     const data = await response.json();
-                    
                     if (data.error) {
-                        document.getElementById('result').innerText = `Error: ${data.error}`;
+                        document.getElementById('result').innerHTML = `<span style="color:#e53935;">Error: ${data.error}</span>`;
                     } else {
-                        document.getElementById('result').innerText =
-                            `Recognized: ${data.recognized || ''}\nAction: ${data.action || ''}`;
+                        document.getElementById('result').innerHTML =
+                            `<span>Recognized: <b>${data.recognized || ''}</b><br>Action: <b>${data.action || ''}</b></span>`;
                     }
                 } catch (err) {
-                    document.getElementById('result').innerText = 'Error: ' + err.message;
+                    document.getElementById('result').innerHTML = '<span style="color:#e53935;">Error: ' + err.message + '</span>';
                 }
             };
-            
             mediaRecorder.stop();
         }
     </script>
 </head>
 <body>
     <h1>Voice Command Detection Demo</h1>
-    <button onclick="startRecording()">Start Recording</button>
-    <button onclick="stopRecording()">Stop & Send</button>
-    <hr>
-    <h2>Or upload a WAV file:</h2>
-    <form id="uploadForm">
-        <input type="file" id="audioFile" accept="audio/wav">
-        <button type="submit">Upload & Test</button>
-    </form>
-    <p id="result"></p>
-    <script>
-        document.getElementById('uploadForm').onsubmit = function(e) {
-            e.preventDefault();
-            const fileInput = document.getElementById('audioFile');
-            if (fileInput.files.length === 0) {
-                document.getElementById('result').innerText = 'Please select a WAV file.';
-                return;
-            }
-            const formData = new FormData();
-            formData.append('audio', fileInput.files[0]);
-            fetch('/voicecontrol/voice-command/', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('result').innerText =
-                    `Recognized: ${data.recognized}\nAction: ${data.action}`;
-            })
-            .catch(err => {
-                document.getElementById('result').innerText = 'Error: ' + err;
-            });
-        };
-    </script>
+    <div class="controls">
+        <button onclick="startRecording()">Start Recording</button>
+        <button onclick="stopRecording()">Stop & Send</button>
+    </div>
+    <div id="result" class="feedback"></div>
 </body>
 </html>
