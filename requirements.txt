@@ -2,3 +2,5 @@ django
 deepface
 django-crispy-forms
 tf-keras
+vosk
+sounddevice
