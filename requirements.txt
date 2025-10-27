@@ -1,5 +1,4 @@
 django
 deepface
 django-crispy-forms
-google-cloud-speech
 tf-keras
