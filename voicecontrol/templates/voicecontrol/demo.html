@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Voice Command Demo</title>
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let stream;
+
+        async function startRecording() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.start();
+                document.getElementById('result').innerText = 'Recording...';
+            } catch (err) {
+                document.getElementById('result').innerText = 'Error: ' + err.message;
+            }
+        }
+
+        async function stopRecording() {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                document.getElementById('result').innerText = 'No active recording';
+                return;
+            }
+            
+            mediaRecorder.onstop = async () => {
+                // Stop the microphone stream
+                stream.getTracks().forEach(track => track.stop());
+                
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'command.webm');
+                
+                document.getElementById('result').innerText = 'Processing...';
+                
+                try {
+                    const response = await fetch('/voicecontrol/voice-command/', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        document.getElementById('result').innerText = `Error: ${data.error}`;
+                    } else {
+                        document.getElementById('result').innerText =
+                            `Recognized: ${data.recognized || ''}\nAction: ${data.action || ''}`;
+                    }
+                } catch (err) {
+                    document.getElementById('result').innerText = 'Error: ' + err.message;
+                }
+            };
+            
+            mediaRecorder.stop();
+        }
+    </script>
+</head>
+<body>
+    <h1>Voice Command Detection Demo</h1>
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop & Send</button>
+    <hr>
+    <h2>Or upload a WAV file:</h2>
+    <form id="uploadForm">
+        <input type="file" id="audioFile" accept="audio/wav">
+        <button type="submit">Upload & Test</button>
+    </form>
+    <p id="result"></p>
+    <script>
+        document.getElementById('uploadForm').onsubmit = function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('audioFile');
+            if (fileInput.files.length === 0) {
+                document.getElementById('result').innerText = 'Please select a WAV file.';
+                return;
+            }
+            const formData = new FormData();
+            formData.append('audio', fileInput.files[0]);
+            fetch('/voicecontrol/voice-command/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText =
+                    `Recognized: ${data.recognized}\nAction: ${data.action}`;
+            })
+            .catch(err => {
+                document.getElementById('result').innerText = 'Error: ' + err;
+            });
+        };
+    </script>
+</body>
+</html>

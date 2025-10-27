@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
-    'crispy_forms' # Pour des formulaires plus jolis
+    'crispy_forms', # Pour des formulaires plus jolis
+    'voicecontrol',
 ]
 
 MIDDLEWARE = [
