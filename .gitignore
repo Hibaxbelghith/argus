@@ -1,6 +1,7 @@
 # Environnement virtuel
 venv/
 .env
+.venv/
 
 # Fichiers de base de données
 db.sqlite3
