@@ -78,6 +78,19 @@
           <a href="#" class="btn btn-outline-primary">Voir</a>
         </div>
       </div>
+
+      <!-- Bloc 4 : Voice Control -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">🎤 Commandes vocales</h5>
+          <p>Testez et gérez les commandes vocales pour contrôler la sécurité et l’accès.</p>
+          {% if request.user.is_staff %}
+            <a href="/admin/voicecontrol/voicecommand/" class="btn btn-outline-primary">Gérer les commandes (CRUD)</a>
+          {% else %}
+            <a href="{% url 'voice_demo' %}" class="btn btn-outline-primary">Accéder au module</a>
+          {% endif %}
+        </div>
+      </div>
     </div>
 
     <!-- Bloc 4 -->
