@@ -3,14 +3,20 @@
 ## Project Overview
 Argus is an intelligent surveillance platform that integrates facial recognition, object/person detection, movement detection, and voice command detection for security actions.
 
-## Voice Command Detection
-Control security actions (lock/unlock doors, trigger/disarm alarm, open garage, turn on lights) using natural voice commands and synonyms.
 
-**Demo:**
-- Go to `/voicecontrol/demo/` to test live voice commands.
+## Live Emotion Detection
+Detect emotions in real time using your webcam, with results shown as overlays on the video feed.
 
-**Admin CRUD (Voice):**
-- Staff can manage voice commands and synonyms in the dashboard (card links to admin CRUD for staff, demo for users).
+**How it works:**
+- Go to `/emotion/live/` in the web UI.
+- Click "Launch Live Emotion Detection". This sends a request to the local launcher.
+- The launcher opens a desktop window with your webcam feed and emotion labels (using DeepFace).
+- It may take a few seconds for the window to appear.
+
+**Requirements:**
+- Run `emotion_launcher.py` locally before using the feature
+
+**Note:** This feature runs locally for privacy and performance. The web UI only triggers the desktop app; it does not stream video to the server.
 
 ## Quick Setup
 1. Clone repo
