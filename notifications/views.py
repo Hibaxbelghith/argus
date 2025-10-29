@@ -72,6 +72,46 @@ def mark_all_read(request):
 
 
 @login_required
+def delete_notification(request, pk):
+    """
+    Delete a single notification
+    """
+    notification = get_object_or_404(Notification, pk=pk, user=request.user)
+    notification.delete()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': 'Notification supprimée'})
+    
+    messages.success(request, "🗑️ Notification supprimée avec succès.")
+    return redirect('notifications:dashboard')
+
+
+@login_required
+def delete_all_read(request):
+    """
+    Delete all read notifications
+    """
+    deleted_count = Notification.objects.filter(
+        user=request.user,
+        read_at__isnull=False
+    ).delete()[0]
+    
+    messages.success(request, f"🗑️ {deleted_count} notification(s) lue(s) supprimée(s).")
+    return redirect('notifications:dashboard')
+
+
+@login_required
+def delete_all_notifications(request):
+    """
+    Delete all notifications for the user
+    """
+    deleted_count = Notification.objects.filter(user=request.user).delete()[0]
+    
+    messages.success(request, f"🗑️ {deleted_count} notification(s) supprimée(s).")
+    return redirect('notifications:dashboard')
+
+
+@login_required
 def preferences_view(request):
     """
     View and edit notification preferences
@@ -149,7 +189,8 @@ def create_rule(request):
             condition_value={},  # À compléter selon le type de condition
             action=request.POST.get('action'),
             action_parameters={},
-            priority=int(request.POST.get('priority', 0))
+            priority=int(request.POST.get('priority', 0)),
+            is_active=request.POST.get('enabled') == 'on'
         )
         
         messages.success(request, f"✅ Règle '{rule.name}' créée avec succès.")

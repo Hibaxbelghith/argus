@@ -48,6 +48,26 @@
                 <a href="{% url 'notifications:mark_all_read' %}" class="btn btn-outline-success">
                     <i class="bi bi-check-all"></i> Tout marquer comme lu
                 </a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'notifications:delete_all_read' %}" 
+                               onclick="return confirm('Supprimer toutes les notifications lues ?')">
+                                <i class="bi bi-trash"></i> Notifications lues
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{% url 'notifications:delete_all' %}" 
+                               onclick="return confirm('⚠️ Supprimer TOUTES les notifications ? Cette action est irréversible !')">
+                                <i class="bi bi-trash-fill"></i> Toutes les notifications
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -129,6 +149,11 @@
                             <div class="ms-3">
                                 <a href="{% url 'notifications:detail' notification.pk %}" class="btn btn-sm btn-primary">
                                     <i class="bi bi-eye"></i> Voir
+                                </a>
+                                <a href="{% url 'notifications:delete_notification' notification.pk %}" 
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Supprimer cette notification ?')">
+                                    <i class="bi bi-trash"></i>
                                 </a>
                             </div>
                         </div>
