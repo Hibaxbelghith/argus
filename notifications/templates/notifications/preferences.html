@@ -1,0 +1,214 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préférences de Notifications - Argus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">🛡️ Argus</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'notifications:dashboard' %}">Notifications</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <h1 class="mb-4"><i class="bi bi-gear"></i> Préférences de Notifications</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Canaux de notification -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-broadcast"></i> Canaux de Notification</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="enabled_methods" value="web" 
+                               id="method_web" {% if 'web' in preferences.enabled_methods %}checked{% endif %}>
+                        <label class="form-check-label" for="method_web">
+                            <i class="bi bi-browser-chrome"></i> Dashboard Web
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="enabled_methods" value="email" 
+                               id="method_email" {% if 'email' in preferences.enabled_methods %}checked{% endif %}>
+                        <label class="form-check-label" for="method_email">
+                            <i class="bi bi-envelope"></i> Email
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="enabled_methods" value="sms" 
+                               id="method_sms" {% if 'sms' in preferences.enabled_methods %}checked{% endif %}>
+                        <label class="form-check-label" for="method_sms">
+                            <i class="bi bi-phone"></i> SMS
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="enabled_methods" value="push" 
+                               id="method_push" {% if 'push' in preferences.enabled_methods %}checked{% endif %}>
+                        <label class="form-check-label" for="method_push">
+                            <i class="bi bi-bell"></i> Notifications Push
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sévérité minimale -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-sliders"></i> Sévérité Minimale par Canal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Web</label>
+                            <select class="form-select" name="min_severity_web">
+                                <option value="low" {% if preferences.min_severity_web == 'low' %}selected{% endif %}>Basse</option>
+                                <option value="medium" {% if preferences.min_severity_web == 'medium' %}selected{% endif %}>Moyenne</option>
+                                <option value="high" {% if preferences.min_severity_web == 'high' %}selected{% endif %}>Haute</option>
+                                <option value="critical" {% if preferences.min_severity_web == 'critical' %}selected{% endif %}>Critique</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Email</label>
+                            <select class="form-select" name="min_severity_email">
+                                <option value="low" {% if preferences.min_severity_email == 'low' %}selected{% endif %}>Basse</option>
+                                <option value="medium" {% if preferences.min_severity_email == 'medium' %}selected{% endif %}>Moyenne</option>
+                                <option value="high" {% if preferences.min_severity_email == 'high' %}selected{% endif %}>Haute</option>
+                                <option value="critical" {% if preferences.min_severity_email == 'critical' %}selected{% endif %}>Critique</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">SMS</label>
+                            <select class="form-select" name="min_severity_sms">
+                                <option value="low" {% if preferences.min_severity_sms == 'low' %}selected{% endif %}>Basse</option>
+                                <option value="medium" {% if preferences.min_severity_sms == 'medium' %}selected{% endif %}>Moyenne</option>
+                                <option value="high" {% if preferences.min_severity_sms == 'high' %}selected{% endif %}>Haute</option>
+                                <option value="critical" {% if preferences.min_severity_sms == 'critical' %}selected{% endif %}>Critique</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heures silencieuses -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-moon"></i> Heures Silencieuses (Do Not Disturb)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="quiet_hours_enabled" 
+                               id="quiet_hours_enabled" {% if preferences.quiet_hours_enabled %}checked{% endif %}>
+                        <label class="form-check-label" for="quiet_hours_enabled">
+                            Activer les heures silencieuses
+                        </label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Début</label>
+                            <input type="time" class="form-control" name="quiet_hours_start" 
+                                   value="{{ preferences.quiet_hours_start|time:'H:i' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fin</label>
+                            <input type="time" class="form-control" name="quiet_hours_end" 
+                                   value="{{ preferences.quiet_hours_end|time:'H:i' }}">
+                        </div>
+                    </div>
+                    <small class="text-muted">Les alertes critiques seront toujours envoyées</small>
+                </div>
+            </div>
+
+            <!-- Agrégation -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-collection"></i> Agrégation des Notifications</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="enable_aggregation" 
+                               id="enable_aggregation" {% if preferences.enable_aggregation %}checked{% endif %}>
+                        <label class="form-check-label" for="enable_aggregation">
+                            Grouper les notifications similaires
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fenêtre d'agrégation (minutes)</label>
+                        <input type="number" class="form-control" name="aggregation_window_minutes" 
+                               value="{{ preferences.aggregation_window_minutes }}" min="1" max="120">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Limite de fréquence -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-speedometer"></i> Limite de Fréquence</h5>
+                </div>
+                <div class="card-body">
+                    <label class="form-label">Maximum de notifications par heure (0 = illimité)</label>
+                    <input type="number" class="form-control" name="max_notifications_per_hour" 
+                           value="{{ preferences.max_notifications_per_hour }}" min="0" max="100">
+                </div>
+            </div>
+
+            <!-- Filtres de types d'alertes -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-filter"></i> Types d'Alertes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="notify_suspicious_objects" 
+                               id="notify_suspicious_objects" {% if preferences.notify_suspicious_objects %}checked{% endif %}>
+                        <label class="form-check-label" for="notify_suspicious_objects">
+                            Objets suspects détectés
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="notify_anomalies" 
+                               id="notify_anomalies" {% if preferences.notify_anomalies %}checked{% endif %}>
+                        <label class="form-check-label" for="notify_anomalies">
+                            Anomalies détectées
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="notify_high_frequency" 
+                               id="notify_high_frequency" {% if preferences.notify_high_frequency %}checked{% endif %}>
+                        <label class="form-check-label" for="notify_high_frequency">
+                            Fréquence de détection élevée
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="notify_unusual_time" 
+                               id="notify_unusual_time" {% if preferences.notify_unusual_time %}checked{% endif %}>
+                        <label class="form-check-label" for="notify_unusual_time">
+                            Détection à heure inhabituelle
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-save"></i> Enregistrer les Préférences
+                </button>
+                <a href="{% url 'notifications:dashboard' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

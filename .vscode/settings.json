@@ -1,0 +1,22 @@
+{
+    "git.ignoreLimitWarning": true,
+    "files.associations": {
+        "**/*.html": "html",
+        "**/templates/**/*.html": "django-html",
+        "**/templates/**": "django-txt"
+    },
+    "emmet.includeLanguages": {
+        "django-html": "html"
+    },
+    "[django-html]": {
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        }
+    },
+    "html.validate.scripts": false,
+    "html.validate.styles": false,
+    "css.validate": false,
+    "javascript.validate.enable": false
+}

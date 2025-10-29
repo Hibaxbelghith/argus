@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détail Notification - Argus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">🛡️ Argus</a>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="card border-{% if notification.severity == 'critical' %}danger{% elif notification.severity == 'high' %}warning{% elif notification.severity == 'medium' %}info{% else %}secondary{% endif %}">
+            <div class="card-header bg-{% if notification.severity == 'critical' %}danger{% elif notification.severity == 'high' %}warning{% elif notification.severity == 'medium' %}info{% else %}secondary{% endif %} text-white">
+                <h4>
+                    <i class="bi bi-bell"></i> Notification
+                    <span class="badge bg-light text-dark float-end">{{ notification.get_severity_display }}</span>
+                </h4>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ notification.title }}</h5>
+                <p class="card-text">{{ notification.message }}</p>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Type:</strong> {{ notification.get_notification_type_display }}</p>
+                        <p><strong>Canal:</strong> {{ notification.get_delivery_method_display }}</p>
+                        <p><strong>Statut:</strong> 
+                            <span class="badge bg-{% if notification.status == 'sent' %}success{% elif notification.status == 'failed' %}danger{% else %}warning{% endif %}">
+                                {{ notification.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Créée:</strong> {{ notification.created_at|date:"d/m/Y à H:i:s" }}</p>
+                        {% if notification.sent_at %}
+                        <p><strong>Envoyée:</strong> {{ notification.sent_at|date:"d/m/Y à H:i:s" }}</p>
+                        {% endif %}
+                        {% if notification.read_at %}
+                        <p><strong>Lue:</strong> {{ notification.read_at|date:"d/m/Y à H:i:s" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if metadata %}
+                <hr>
+                <h6>Métadonnées:</h6>
+                <pre class="bg-light p-3 rounded">{{ metadata|pprint }}</pre>
+                {% endif %}
+
+                {% if notification.related_alert_id %}
+                <hr>
+                <p>
+                    <a href="{% url 'analytics:alerts' %}" class="btn btn-info">
+                        <i class="bi bi-shield-exclamation"></i> Voir les Alertes Associées
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'notifications:dashboard' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour aux Notifications
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

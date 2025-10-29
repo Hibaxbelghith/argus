@@ -1,0 +1,31 @@
+# Environnement virtuel
+venv/
+.env
+.venv/
+
+optimal.venv/
+optimal/
+
+# Fichiers de base de données
+db.sqlite3
+
+# Fichiers temporaires et caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.pot
+*.pyc
+*.sqlite3
+*.db
+
+# Fichiers IA / modèles
+*.h5
+*.weights
+*.ckpt
+*.pt
+
+# Dossiers Django spécifiques
+/static/
+ /media/

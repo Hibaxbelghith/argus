@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tableau de bord</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f5f6fa;
+      font-family: "Poppins", sans-serif;
+      color: #333;
+    }
+    .navbar {
+      background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    }
+    .navbar-brand {
+      color: white !important;
+      font-weight: bold;
+    }
+    .nav-link {
+      color: white !important;
+    }
+    .dashboard-container {
+      margin-top: 50px;
+    }
+    .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .card-title {
+      color: #0d6efd;
+    }
+  </style>
+</head>
+<body>
+  <!-- Barre de navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">🔒 SecureVision</a>
+      <div class="d-flex">
+        <a href="{% url 'logout' %}" class="btn btn-light btn-sm">Déconnexion</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenu principal -->
+  <div class="container dashboard-container">
+    <div class="text-center mb-4">
+      <h2>Bienvenue, {{ request.user.username }} 👋</h2>
+      <p>Heureux de vous revoir ! Voici votre espace de gestion et de sécurité.</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Bloc 1 -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">📷 Caméra</h5>
+          <p>Visualisez le flux en direct et configurez la surveillance intelligente.</p>
+          <a href="#" class="btn btn-outline-primary">Ouvrir</a>
+        </div>
+      </div>
+
+      <!-- Bloc 2 -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">🤖 Détection IA</h5>
+          <p>Activez l’analyse automatique et la reconnaissance faciale.</p>
+          <a href="#" class="btn btn-outline-primary">Configurer</a>
+        </div>
+      </div>
+
+      <!-- Bloc 3 -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">⚠️ Alertes</h5>
+          <p>Consultez les alertes générées et l’historique des événements.</p>
+          <a href="#" class="btn btn-outline-primary">Voir</a>
+        </div>
+      </div>
+
+      <!-- Bloc 4 : Voice Control -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">🎤 Commandes vocales</h5>
+          <p>Testez et gérez les commandes vocales pour contrôler la sécurité et l’accès.</p>
+          {% if request.user.is_staff %}
+            <a href="/admin/voicecontrol/voicecommand/" class="btn btn-outline-primary">Gérer les commandes (CRUD)</a>
+          {% else %}
+            <a href="{% url 'voice_demo' %}" class="btn btn-outline-primary">Accéder au module</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Bloc 5 -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">🎯 Détection objets</h5>
+          <p>Analyse en temps réel du flux vidéo pour détecter personnes et objets automatiquement.</p>
+          <a href="/detection/" class="btn btn-outline-primary">Ouvrir</a>
+        </div>
+      </div>
+
+      <!-- Bloc 6 : Live Emotion Detection -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">😊 Détection d'émotions</h5>
+          <p>Détectez les émotions en temps réel via votre webcam avec affichage des résultats en direct.</p>
+          <a href="/emotion/live/" class="btn btn-outline-primary">Lancer le module</a>
+        </div>
+      </div>
+
+      <!-- Bloc 7 : Analytics -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">📊 Analytics</h5>
+          <p>Visualisez les statistiques, tendances et insights générés par l'IA sur vos détections.</p>
+          <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-primary">Dashboard Analytics</a>
+        </div>
+      </div>
+
+      <!-- Bloc 8 : Notifications -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">🔔 Notifications</h5>
+          <p>Gérez vos notifications, alertes prédictives et préférences de communication.</p>
+          <a href="{% url 'notifications:dashboard' %}" class="btn btn-outline-primary">Centre de notifications</a>
+        </div>
+      </div>
+
+      <!-- Bloc 9 : Historique Détections -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">📜 Historique</h5>
+          <p>Consultez l'historique complet de toutes vos détections et analyses.</p>
+          <a href="{% url 'detection:history' %}" class="btn btn-outline-primary">Voir l'historique</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section des statistiques rapides -->
+    <div class="row g-4 mt-4">
+      <div class="col-12">
+        <h4 class="text-center mb-3">📈 Statistiques Rapides</h4>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card p-3 text-center bg-primary text-white">
+          <h6>Total Détections</h6>
+          <h2 id="total-detections">--</h2>
+          <small>Depuis le début</small>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card p-3 text-center bg-success text-white">
+          <h6>Objets Détectés</h6>
+          <h2 id="total-objects">--</h2>
+          <small>Aujourd'hui</small>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card p-3 text-center bg-warning text-white">
+          <h6>Alertes Actives</h6>
+          <h2 id="active-alerts">--</h2>
+          <small>Non résolues</small>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card p-3 text-center bg-info text-white">
+          <h6>Notifications</h6>
+          <h2 id="unread-notifications">--</h2>
+          <small>Non lues</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Charger les statistiques au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadStats();
+      // Rafraîchir toutes les 30 secondes
+      setInterval(loadStats, 30000);
+    });
+
+    async function loadStats() {
+      try {
+        // Statistiques Analytics
+        const analyticsResponse = await fetch('/analytics/api/stats/summary/');
+        if (analyticsResponse.ok) {
+          const analyticsData = await analyticsResponse.json();
+          document.getElementById('total-detections').textContent = 
+            analyticsData.data.total_detections || 0;
+          document.getElementById('total-objects').textContent = 
+            analyticsData.data.total_objects_detected || 0;
+          document.getElementById('active-alerts').textContent = 
+            analyticsData.data.alerts.unread || 0;
+        }
+
+        // Statistiques Notifications
+        const notifResponse = await fetch('/notifications/api/stats/');
+        if (notifResponse.ok) {
+          const notifData = await notifResponse.json();
+          document.getElementById('unread-notifications').textContent = 
+            notifData.data.unread_count || 0;
+        }
+      } catch (error) {
+        console.log('Erreur lors du chargement des statistiques:', error);
+        // Afficher 0 en cas d'erreur
+        document.getElementById('total-detections').textContent = '0';
+        document.getElementById('total-objects').textContent = '0';
+        document.getElementById('active-alerts').textContent = '0';
+        document.getElementById('unread-notifications').textContent = '0';
+      }
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

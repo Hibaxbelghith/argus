@@ -1,0 +1,12 @@
+django
+deepface
+django-crispy-forms
+tf-keras
+vosk
+sounddevice
+torch
+torchvision
+opencv-python
+Pillow
+yolov5
+flask

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+    }
+    .login-card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      width: 400px;
+      padding: 30px;
+    }
+    .login-card h3 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #0d6efd;
+    }
+    .camera-section {
+      margin-top: 30px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h3>🔐 Connexion</h3>
+
+    {% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-danger">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+    
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="username" class="form-label">Nom d’utilisateur</label>
+        <input type="text" name="username" class="form-control" placeholder="Entrez votre nom">
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Mot de passe</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+    </form>
+
+    <div class="camera-section">
+      <hr>
+      <h6 class="mt-3">Ou se connecter avec la caméra 🎥</h6>
+      <input type="text" id="username_cam" class="form-control mt-2" placeholder="Votre nom d’utilisateur">
+      <button class="btn btn-outline-primary mt-2">Se connecter par caméra</button>
+    </div>
+
+    <div class="text-center mt-3">
+  <p>Pas encore de compte ? <a href="{% url 'register' %}">Créer un compte</a></p>
+</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<script>
+  // Récupère les éléments
+  const video = document.createElement('video');
+  const cameraButton = document.querySelector('.camera-section button');
+
+  cameraButton.addEventListener('click', async () => {
+    const username = document.getElementById('username_cam').value.trim();
+    if (!username) {
+      alert("Veuillez entrer votre nom d'utilisateur avant d'utiliser la caméra.");
+      return;
+    }
+
+    // Ouvre la caméra
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      video.play();
+
+      // Crée une petite fenêtre de prévisualisation
+      const preview = document.createElement('div');
+      preview.style.position = 'fixed';
+      preview.style.top = '50%';
+      preview.style.left = '50%';
+      preview.style.transform = 'translate(-50%, -50%)';
+      preview.style.background = '#fff';
+      preview.style.padding = '20px';
+      preview.style.borderRadius = '10px';
+      preview.style.textAlign = 'center';
+      preview.innerHTML = "<h5>Capturer votre visage</h5>";
+      preview.appendChild(video);
+
+      const captureButton = document.createElement('button');
+      captureButton.textContent = 'Capturer et envoyer';
+      captureButton.className = 'btn btn-success mt-3';
+      preview.appendChild(captureButton);
+
+      document.body.appendChild(preview);
+
+      captureButton.addEventListener('click', async () => {
+        // Capture l'image du flux vidéo
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/png');
+
+        // Stop la caméra
+        stream.getTracks().forEach(track => track.stop());
+        preview.remove();
+
+        // Envoie l’image à Django
+        const response = await fetch("{% url 'face_login' %}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+          body: JSON.stringify({ image: imageData, username: username })
+        });
+
+        const result = await response.json();
+        alert(result.message);
+
+        if (result.success) {
+          window.location.href = "{% url 'dashboard' %}";
+        }
+      });
+
+    } catch (err) {
+      alert("Erreur d’accès à la caméra : " + err.message);
+    }
+  });
+</script>
+

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Emotion Detection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7fa; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        h1 { margin-top: 2rem; color: #222; }
+        #emotion-label { margin-top: 1.5rem; font-size: 2rem; font-weight: bold; color: #4f8cff; }
+        #video { margin-top: 2rem; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); }
+        #start-btn { margin-top: 2rem; padding: 1rem 2rem; font-size: 1.2rem; border-radius: 8px; border: none; background: #4f8cff; color: #fff; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Live Emotion Detection</h1>
+    <div style="margin-top:2rem;max-width:600px;background:#fff;padding:2rem;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.10);text-align:center;">
+    <p style="font-size:1.2rem;color:#222;">To use live emotion detection with real-time feedback and overlays, please click the button below to launch the desktop application.</p>
+    <p style="font-size:1.1rem;color:#d35400;margin-bottom:10px;"><strong>Note:</strong> After clicking the button, it may take a few seconds for the live emotion detection window to appear. Please wait and do not click multiple times.</p>
+        <p style="color:#4f8cff;font-size:1.1rem;">This will open a separate window with your webcam feed and emotion labels.</p>
+        <button id="launch-emotion" style="margin-top:2rem;padding:1rem 2rem;font-size:1.2rem;border-radius:8px;border:none;background:#4f8cff;color:#fff;cursor:pointer;">Launch Live Emotion Detection</button>
+        <p id="launch-status" style="margin-top:1rem;color:#222;font-size:1rem;"></p>
+    </div>
+    <script>
+        document.getElementById('launch-emotion').onclick = function() {
+            const status = document.getElementById('launch-status');
+            status.textContent = 'Please wait...';
+            fetch('http://localhost:5000/launch', {method: 'POST'})
+                .then(res => {
+                    setTimeout(() => {
+                        if (res.ok) {
+                            status.textContent = 'Emotion detection started! Check for a new window.';
+                        } else {
+                            status.textContent = 'Could not start emotion detection. Is the launcher running?';
+                        }
+                    }, 3000);
+                })
+                .catch(() => {
+                    setTimeout(() => {
+                        status.textContent = '';
+                    }, 3000);
+                });
+        };
+    </script>
+</body>
+</html>
