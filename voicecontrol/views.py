@@ -11,24 +11,9 @@ import json
 import os
 from django.conf import settings
 from django.core.files.storage import default_storage
+from .models import VoiceCommand
 
 
-COMMAND_SYNONYMS = {
-	"lock doors": ["lock the doors", "secure doors", "close doors", "shut doors"],
-	"unlock doors": ["unlock the doors", "open doors", "release doors"],
-	"trigger alarm": ["activate alarm", "sound alarm", "start alarm"],
-	"disarm alarm": ["disable alarm", "turn off alarm", "stop alarm"],
-	"open garage": ["open the garage", "raise garage door", "garage up"],
-	"turn on lights": ["switch on lights", "lights on", "illuminate room", "turn the lights on"],
-}
-COMMAND_ACTIONS = {
-	"lock doors": "Doors locked.",
-	"trigger alarm": "Alarm triggered!",
-	"unlock doors": "Doors unlocked.",
-	"disarm alarm": "Alarm disarmed.",
-	"open garage": "Garage opened.",
-	"turn on lights": "Lights turned on.",
-}
 
 MODEL_PATH = os.path.join(settings.BASE_DIR, "voicecontrol", "vosk-model-small-en-us-0.15")
 
@@ -55,11 +40,12 @@ def recognize_speech(audio_path):
 	except Exception as e:
 		return None, f"Recognition error: {str(e)}"
 
+
 @csrf_exempt
 def voice_command(request):
 	if request.method == "POST" and request.FILES.get("audio"):
 		audio_file = request.FILES["audio"]
-		
+
 		# Save the uploaded file
 		import tempfile
 		temp_input = tempfile.NamedTemporaryFile(delete=False, suffix='.webm')
@@ -67,7 +53,7 @@ def voice_command(request):
 		temp_input.write(audio_file.read())
 		temp_input.close()
 		temp_output.close()
-		
+
 		# Convert webm to WAV using ffmpeg
 		import subprocess
 		try:
@@ -94,14 +80,14 @@ def voice_command(request):
 				"recognized": "",
 				"action": ""
 			})
-		
+
 		# Recognize speech
 		command_text, error = recognize_speech(temp_output.name)
-		
+
 		# Clean up temp files
 		os.remove(temp_input.name)
 		os.remove(temp_output.name)
-		
+
 		response = {}
 		if error:
 			response["error"] = error
@@ -111,32 +97,21 @@ def voice_command(request):
 			response["recognized"] = command_text
 			text = command_text.lower()
 			found = False
-			# Fuzzy match against synonyms
-			for cmd, synonyms in COMMAND_SYNONYMS.items():
-				for phrase in [cmd] + synonyms:
+
+			# Load commands from DB
+			commands = VoiceCommand.objects.filter(enabled=True)
+			for cmd_obj in commands:
+				cmd = cmd_obj.text.lower()
+				synonyms = [cmd] + [s.strip().lower() for s in cmd_obj.synonyms.split(',') if s.strip()]
+				for phrase in synonyms:
 					ratio = difflib.SequenceMatcher(None, phrase, text).ratio()
 					if ratio > 0.7 or phrase in text:
-						response["action"] = COMMAND_ACTIONS[cmd]
+						response["action"] = f"{cmd_obj.text.capitalize()} action triggered."
 						found = True
 						break
 				if found:
 					break
 			if not found:
-				# Fallback to keyword logic
-				if "unlock" in text and "door" in text:
-					response["action"] = COMMAND_ACTIONS["unlock doors"]
-				elif "lock" in text and "door" in text:
-					response["action"] = COMMAND_ACTIONS["lock doors"]
-				elif "trigger" in text and "alarm" in text:
-					response["action"] = COMMAND_ACTIONS["trigger alarm"]
-				elif "disarm" in text and "alarm" in text:
-					response["action"] = COMMAND_ACTIONS["disarm alarm"]
-				elif "open" in text and "garage" in text:
-					response["action"] = COMMAND_ACTIONS["open garage"]
-				elif ("turn on" in text or "switch on" in text) and "light" in text:
-					response["action"] = COMMAND_ACTIONS["turn on lights"]
-				else:
-					response["action"] = "No valid command detected."
+				response["action"] = "No valid command detected."
 		return JsonResponse(response)
 	return JsonResponse({"error": "Invalid request."}, status=400)
-
