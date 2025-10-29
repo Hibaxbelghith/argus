@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Argus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .notification-badge {
+            position: relative;
+            top: -10px;
+            right: -5px;
+        }
+        .unread-notification {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">🛡️ Argus</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'analytics:dashboard' %}">Analytics</a>
+                <a class="nav-link active" href="{% url 'notifications:dashboard' %}">
+                    Notifications
+                    {% if unread_count > 0 %}
+                    <span class="badge bg-danger notification-badge">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+                <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-bell"></i> Notifications Intelligentes</h1>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'notifications:preferences' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-gear"></i> Préférences
+                </a>
+                <a href="{% url 'notifications:mark_all_read' %}" class="btn btn-outline-success">
+                    <i class="bi bi-check-all"></i> Tout marquer comme lu
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-white bg-primary">
+                    <div class="card-body text-center">
+                        <h5>Total Notifications</h5>
+                        <h2>{{ total_count }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-white bg-warning">
+                    <div class="card-body text-center">
+                        <h5>Non Lues</h5>
+                        <h2>{{ unread_count }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Agrégées -->
+        {% if aggregated_notifications %}
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5><i class="bi bi-collection"></i> Notifications Groupées</h5>
+            </div>
+            <div class="card-body">
+                {% for group_id, group_notifications in aggregated_notifications.items %}
+                <div class="alert alert-info">
+                    <h6>
+                        <i class="bi bi-stack"></i> 
+                        {{ group_notifications|length }} notifications similaires
+                        <span class="badge bg-primary">{{ group_notifications.0.get_severity_display }}</span>
+                    </h6>
+                    <p class="mb-0">Dernière: {{ group_notifications.0.title }}</p>
+                    <small class="text-muted">{{ group_notifications.0.created_at|date:"d/m/Y H:i" }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Notifications Non Lues -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-envelope-open"></i> Notifications Récentes</h5>
+            </div>
+            <div class="card-body">
+                {% for notification in unread_notifications %}
+                <div class="card mb-3 {% if not notification.read_at %}unread-notification{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title">
+                                    {% if notification.severity == 'critical' %}
+                                    <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                                    {% elif notification.severity == 'high' %}
+                                    <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                                    {% elif notification.severity == 'medium' %}
+                                    <i class="bi bi-info-circle-fill text-info"></i>
+                                    {% else %}
+                                    <i class="bi bi-info-circle text-secondary"></i>
+                                    {% endif %}
+                                    {{ notification.title }}
+                                    {% if not notification.read_at %}
+                                    <span class="badge bg-warning">Nouveau</span>
+                                    {% endif %}
+                                </h5>
+                                <p class="card-text">{{ notification.message|truncatewords:30 }}</p>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock"></i> {{ notification.created_at|date:"d/m/Y H:i" }} | 
+                                    Type: {{ notification.get_notification_type_display }} | 
+                                    Canal: {{ notification.get_delivery_method_display }}
+                                </small>
+                            </div>
+                            <div class="ms-3">
+                                <a href="{% url 'notifications:detail' notification.pk %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> Voir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert alert-success text-center" role="alert">
+                    <i class="bi bi-check-circle"></i> Aucune nouvelle notification !
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-gear"></i> Gestion des Notifications</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="{% url 'notifications:rules' %}" class="btn btn-info me-2">
+                            <i class="bi bi-list-check"></i> Règles de Notification
+                        </a>
+                        <a href="{% url 'notifications:predictive' %}" class="btn btn-success me-2">
+                            <i class="bi bi-crystal-ball"></i> Alertes Prédictives
+                        </a>
+                        <a href="{% url 'analytics:alerts' %}" class="btn btn-warning">
+                            <i class="bi bi-shield-exclamation"></i> Alertes de Sécurité
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-refresh pour nouvelles notifications -->
+    <script>
+        // Vérifier les nouvelles notifications toutes les 30 secondes
+        setInterval(function() {
+            fetch("{% url 'notifications:api_updates' %}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.count > 0) {
+                        // Rafraîchir la page si nouvelles notifications
+                        location.reload();
+                    }
+                });
+        }, 30000);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
