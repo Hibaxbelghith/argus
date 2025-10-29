@@ -123,17 +123,43 @@ def delete_detection(request, pk):
     detection = get_object_or_404(DetectionResult, pk=pk, user=request.user)
     
     if request.method == 'POST':
-        # Delete associated files
+        # Delete associated files (only if they exist)
+        files_deleted = []
+        files_missing = []
+        
         if detection.original_image:
-            if os.path.exists(detection.original_image.path):
-                os.remove(detection.original_image.path)
+            try:
+                if os.path.exists(detection.original_image.path):
+                    os.remove(detection.original_image.path)
+                    files_deleted.append('original image')
+                else:
+                    files_missing.append('original image')
+            except Exception as e:
+                # File might be locked or inaccessible, but we can still delete the record
+                files_missing.append(f'original image (error: {str(e)})')
         
         if detection.annotated_image:
-            if os.path.exists(detection.annotated_image.path):
-                os.remove(detection.annotated_image.path)
+            try:
+                if os.path.exists(detection.annotated_image.path):
+                    os.remove(detection.annotated_image.path)
+                    files_deleted.append('annotated image')
+                else:
+                    files_missing.append('annotated image')
+            except Exception as e:
+                files_missing.append(f'annotated image (error: {str(e)})')
         
+        # Delete the database record regardless of file deletion status
         detection.delete()
-        messages.success(request, "Detection result deleted successfully!")
+        
+        # Provide appropriate feedback
+        if files_missing:
+            messages.warning(
+                request, 
+                f"Detection record deleted successfully! Note: {', '.join(files_missing)} not found or could not be deleted."
+            )
+        else:
+            messages.success(request, "Detection result deleted successfully!")
+        
         return redirect('detection:history')
     
     return render(request, 'detection/delete_confirm.html', {'detection': detection})
