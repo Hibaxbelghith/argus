@@ -3,7 +3,8 @@ from .models import (
     DetectionAnalytics,
     ObjectTrend,
     SecurityAlert,
-    AnalyticsInsight
+    AnalyticsInsight,
+    AIRecommendation
 )
 
 
@@ -59,3 +60,63 @@ class AnalyticsInsightAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'title', 'description']
     readonly_fields = ['created_at']
     date_hierarchy = 'created_at'
+
+
+@admin.register(AIRecommendation)
+class AIRecommendationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'recommendation_type', 'priority', 'title', 
+                    'confidence', 'status', 'impact', 'created_at']
+    list_filter = ['recommendation_type', 'priority', 'status', 'impact', 
+                   'was_helpful', 'created_at']
+    search_fields = ['user__username', 'title', 'description', 'action']
+    readonly_fields = ['created_at', 'updated_at', 'viewed_at', 'acted_at', 'dismissed_at']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Classification', {
+            'fields': ('user', 'recommendation_type', 'priority', 'impact')
+        }),
+        ('Contenu', {
+            'fields': ('title', 'description', 'action', 'confidence')
+        }),
+        ('Métadonnées', {
+            'fields': ('metadata',),
+            'classes': ('collapse',)
+        }),
+        ('État', {
+            'fields': ('status', 'expires_at')
+        }),
+        ('Suivi', {
+            'fields': ('viewed_at', 'acted_at', 'dismissed_at'),
+            'classes': ('collapse',)
+        }),
+        ('Feedback Utilisateur', {
+            'fields': ('was_helpful', 'user_feedback'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    actions = ['mark_as_viewed', 'mark_as_acted', 'dismiss_recommendations']
+    
+    def mark_as_viewed(self, request, queryset):
+        from django.utils import timezone
+        queryset.filter(status='pending').update(status='viewed', viewed_at=timezone.now())
+    mark_as_viewed.short_description = "Marquer comme vu"
+    
+    def mark_as_acted(self, request, queryset):
+        from django.utils import timezone
+        queryset.update(status='acted', acted_at=timezone.now())
+    mark_as_acted.short_description = "Marquer comme traité"
+    
+    def dismiss_recommendations(self, request, queryset):
+        from django.utils import timezone
+        queryset.update(status='dismissed', dismissed_at=timezone.now())
+    dismiss_recommendations.short_description = "Rejeter les recommandations"
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('user')

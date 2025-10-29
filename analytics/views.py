@@ -337,3 +337,158 @@ def download_report_json(request):
     ai_report['generated_at'] = ai_report['generated_at'].isoformat()
     
     return JsonResponse(ai_report, json_dumps_params={'indent': 2})
+
+
+@login_required
+def ai_dashboard_view(request):
+    """
+    Dashboard IA avec recommandations intelligentes
+    """
+    from .ai_recommendation_system import RecommendationEngine, SmartRecommendationFilter
+    from .models import AIRecommendation
+    
+    user = request.user
+    
+    # Générer des recommandations si demandé
+    if request.GET.get('generate') == 'true':
+        engine = RecommendationEngine(user)
+        recommendations = engine.analyze_and_recommend(days=30)
+        
+        # Sauvegarder les recommandations haute priorité
+        saved_count = 0
+        for rec in recommendations:
+            if rec['priority'] >= 4:  # High et Critical uniquement
+                # Vérifier si existe déjà
+                exists = AIRecommendation.objects.filter(
+                    user=user,
+                    title=rec['title'],
+                    status__in=['pending', 'viewed']
+                ).exists()
+                
+                if not exists:
+                    AIRecommendation.objects.create(
+                        user=user,
+                        recommendation_type=rec.get('type', 'optimization'),
+                        priority=rec.get('priority', 3),
+                        impact=rec.get('impact', 'medium'),
+                        title=rec.get('title', ''),
+                        description=rec.get('description', ''),
+                        action=rec.get('action', ''),
+                        confidence=rec.get('confidence', 0.0),
+                        metadata=json.dumps(rec.get('metadata', {})),
+                        expires_at=timezone.now() + timedelta(days=30)
+                    )
+                    saved_count += 1
+    
+    # Récupérer les recommandations sauvegardées
+    saved_recommendations = AIRecommendation.objects.filter(
+        user=user,
+        status__in=['pending', 'viewed']
+    ).order_by('-priority', '-confidence')[:10]
+    
+    # Statistiques des recommandations
+    rec_stats = {
+        'total': AIRecommendation.objects.filter(user=user).count(),
+        'pending': AIRecommendation.objects.filter(user=user, status='pending').count(),
+        'acted': AIRecommendation.objects.filter(user=user, status='acted').count(),
+        'by_type': {},
+        'by_priority': {}
+    }
+    
+    # Count by type
+    from django.db.models import Count
+    by_type = AIRecommendation.objects.filter(user=user).values('recommendation_type').annotate(count=Count('id'))
+    for item in by_type:
+        rec_stats['by_type'][item['recommendation_type']] = item['count']
+    
+    # Count by priority
+    by_priority = AIRecommendation.objects.filter(user=user).values('priority').annotate(count=Count('id'))
+    for item in by_priority:
+        rec_stats['by_priority'][item['priority']] = item['count']
+    
+    # Score de santé
+    week_ago = timezone.now() - timedelta(days=7)
+    detections_week = DetectionResult.objects.filter(
+        user=user,
+        uploaded_at__gte=week_ago
+    ).count()
+    
+    alerts_unread = SecurityAlert.objects.filter(
+        user=user,
+        is_read=False
+    ).count()
+    
+    alerts_critical = SecurityAlert.objects.filter(
+        user=user,
+        severity='critical',
+        is_read=False
+    ).count()
+    
+    # Calculer le score de santé
+    health_score = 100
+    if alerts_critical > 0:
+        health_score -= min(alerts_critical * 20, 40)
+    if alerts_unread > 5:
+        health_score -= min((alerts_unread - 5) * 5, 30)
+    if detections_week < 7:
+        health_score -= 20
+    
+    health_score = max(health_score, 0)
+    
+    # Statut de santé
+    if health_score >= 80:
+        health_status = 'excellent'
+        health_label = 'Excellent'
+        health_color = 'success'
+    elif health_score >= 60:
+        health_status = 'good'
+        health_label = 'Bon'
+        health_color = 'info'
+    elif health_score >= 40:
+        health_status = 'fair'
+        health_label = 'Acceptable'
+        health_color = 'warning'
+    else:
+        health_status = 'poor'
+        health_label = 'Attention requise'
+        health_color = 'danger'
+    
+    # Statistiques rapides
+    quick_stats = {
+        'detections_week': detections_week,
+        'alerts_unread': alerts_unread,
+        'alerts_critical': alerts_critical,
+        'recommendations_pending': rec_stats['pending']
+    }
+    
+    # Récupérer les insights récents
+    recent_insights = AnalyticsInsight.objects.filter(
+        user=user,
+        is_active=True
+    ).order_by('-confidence_score', '-created_at')[:5]
+    
+    # Récupérer les alertes récentes
+    recent_alerts = SecurityAlert.objects.filter(
+        user=user
+    ).order_by('-created_at')[:5]
+    
+    # Tendances d'objets
+    top_trends = ObjectTrend.objects.filter(user=user).order_by('-detection_count')[:5]
+    
+    context = {
+        'saved_recommendations': saved_recommendations,
+        'rec_stats': rec_stats,
+        'health': {
+            'score': health_score,
+            'status': health_status,
+            'label': health_label,
+            'color': health_color
+        },
+        'quick_stats': quick_stats,
+        'recent_insights': recent_insights,
+        'recent_alerts': recent_alerts,
+        'top_trends': top_trends,
+        'page_title': 'Dashboard IA - Recommandations'
+    }
+    
+    return render(request, 'analytics/ai_dashboard.html', context)

@@ -312,3 +312,149 @@ class AnalyticsInsight(models.Model):
     def set_data(self, data):
         """Store data as JSON"""
         self.data = json.dumps(data)
+
+
+class AIRecommendation(models.Model):
+    """
+    AI-powered recommendations for users
+    Stores intelligent suggestions based on detection patterns
+    """
+    RECOMMENDATION_TYPE_CHOICES = [
+        ('security', 'Security'),
+        ('optimization', 'Optimization'),
+        ('behavior', 'Behavior Analysis'),
+        ('alert', 'Alert Management'),
+        ('monitoring', 'Monitoring Enhancement'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        (5, 'Critical'),
+        (4, 'High'),
+        (3, 'Medium'),
+        (2, 'Low'),
+        (1, 'Info'),
+    ]
+    
+    IMPACT_CHOICES = [
+        ('high', 'High Impact'),
+        ('medium', 'Medium Impact'),
+        ('low', 'Low Impact'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('viewed', 'Viewed'),
+        ('acted', 'Acted Upon'),
+        ('dismissed', 'Dismissed'),
+        ('expired', 'Expired'),
+    ]
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='ai_recommendations'
+    )
+    
+    # Classification
+    recommendation_type = models.CharField(max_length=20, choices=RECOMMENDATION_TYPE_CHOICES)
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3)
+    impact = models.CharField(max_length=10, choices=IMPACT_CHOICES, default='medium')
+    
+    # Contenu
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    action = models.TextField(help_text="Recommended action to take")
+    
+    # Confiance IA
+    confidence = models.FloatField(
+        default=0.0,
+        help_text="AI confidence score (0-1)"
+    )
+    
+    # Métadonnées (JSON)
+    metadata = models.TextField(
+        default='{}',
+        help_text="JSON: additional context and data"
+    )
+    
+    # État et suivi
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    acted_at = models.DateTimeField(null=True, blank=True)
+    dismissed_at = models.DateTimeField(null=True, blank=True)
+    
+    # Validité
+    expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When this recommendation expires"
+    )
+    
+    # Feedback utilisateur
+    user_feedback = models.TextField(
+        blank=True,
+        help_text="User's feedback on this recommendation"
+    )
+    was_helpful = models.BooleanField(
+        null=True,
+        blank=True,
+        help_text="User rating: was this helpful?"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-priority', '-confidence', '-created_at']
+        verbose_name = 'AI Recommendation'
+        verbose_name_plural = 'AI Recommendations'
+        indexes = [
+            models.Index(fields=['user', 'status', 'priority']),
+            models.Index(fields=['recommendation_type', 'priority']),
+            models.Index(fields=['created_at', 'expires_at']),
+        ]
+    
+    def __str__(self):
+        return f"[{self.get_priority_display()}] {self.title}"
+    
+    def get_metadata(self):
+        """Parse JSON metadata"""
+        try:
+            return json.loads(self.metadata)
+        except json.JSONDecodeError:
+            return {}
+    
+    def set_metadata(self, data):
+        """Store metadata as JSON"""
+        self.metadata = json.dumps(data)
+    
+    def mark_viewed(self):
+        """Mark recommendation as viewed"""
+        if self.status == 'pending':
+            self.status = 'viewed'
+            self.viewed_at = timezone.now()
+            self.save()
+    
+    def mark_acted(self):
+        """Mark recommendation as acted upon"""
+        self.status = 'acted'
+        self.acted_at = timezone.now()
+        self.save()
+    
+    def dismiss(self):
+        """Dismiss recommendation"""
+        self.status = 'dismissed'
+        self.dismissed_at = timezone.now()
+        self.save()
+    
+    def is_expired(self):
+        """Check if recommendation has expired"""
+        if self.expires_at:
+            return timezone.now() > self.expires_at
+        return False
+    
+    def set_feedback(self, was_helpful, feedback_text=''):
+        """Set user feedback"""
+        self.was_helpful = was_helpful
+        self.user_feedback = feedback_text
+        self.save()

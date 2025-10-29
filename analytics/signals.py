@@ -141,7 +141,7 @@ def _check_for_anomalies(detection):
             alert.save()
             
             logger.info(f"Anomaly alert created for detection {detection.id}")
-            _create_notification_from_alert(alert)
+            # Notification envoyée automatiquement via le signal post_save
     
     except Exception as e:
         logger.error(f"Anomaly check failed: {e}")
@@ -182,7 +182,7 @@ def _analyze_suspicious_objects(detection):
             alert.set_context_data({'suspicious_objects': suspicious_objects})
             alert.save()
             
-            _create_notification_from_alert(alert)
+            # Notification envoyée automatiquement via le signal post_save
     
     except Exception as e:
         logger.error(f"Suspicious object analysis failed: {e}")
@@ -241,13 +241,15 @@ def _create_notification_from_alert(alert):
         logger.error(f"Notification creation failed: {e}")
 
 
-@receiver(post_save, sender='analytics.SecurityAlert')
-def send_notification_on_alert(sender, instance, created, **kwargs):
-    """Envoie notification quand alerte créée"""
-    print(f"🚨 ALERT SIGNAL - Alert #{instance.id}, created={created}, severity={instance.severity}")
-    
-    if created:
-        print(f"✅ Creating notifications for alert #{instance.id}")
-        _create_notification_from_alert(instance)
-    else:
-        print(f"❌ Alert signal skipped - not created")
+# DÉSACTIVÉ - Le signal dans notifications/signals.py gère déjà ceci
+# Pour éviter les doublons de notifications SMS
+# @receiver(post_save, sender='analytics.SecurityAlert')
+# def send_notification_on_alert(sender, instance, created, **kwargs):
+#     """Envoie notification quand alerte créée"""
+#     print(f"🚨 ALERT SIGNAL - Alert #{instance.id}, created={created}, severity={instance.severity}")
+#     
+#     if created:
+#         print(f"✅ Creating notifications for alert #{instance.id}")
+#         _create_notification_from_alert(instance)
+#     else:
+#         print(f"❌ Alert signal skipped - not created")
