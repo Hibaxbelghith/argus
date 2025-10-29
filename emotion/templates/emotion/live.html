@@ -14,52 +14,33 @@
 </head>
 <body>
     <h1>Live Emotion Detection</h1>
-    <button id="start-btn">Start Camera</button>
-    <video id="video" width="480" height="360" autoplay muted style="display:none;"></video>
-    <div id="emotion-label">Emotion: <span id="emotion">-</span></div>
+    <div style="margin-top:2rem;max-width:600px;background:#fff;padding:2rem;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.10);text-align:center;">
+    <p style="font-size:1.2rem;color:#222;">To use live emotion detection with real-time feedback and overlays, please click the button below to launch the desktop application.</p>
+    <p style="font-size:1.1rem;color:#d35400;margin-bottom:10px;"><strong>Note:</strong> After clicking the button, it may take a few seconds for the live emotion detection window to appear. Please wait and do not click multiple times.</p>
+        <p style="color:#4f8cff;font-size:1.1rem;">This will open a separate window with your webcam feed and emotion labels.</p>
+        <button id="launch-emotion" style="margin-top:2rem;padding:1rem 2rem;font-size:1.2rem;border-radius:8px;border:none;background:#4f8cff;color:#fff;cursor:pointer;">Launch Live Emotion Detection</button>
+        <p id="launch-status" style="margin-top:1rem;color:#222;font-size:1rem;"></p>
+    </div>
     <script>
-        const video = document.getElementById('video');
-        const startBtn = document.getElementById('start-btn');
-        const emotionSpan = document.getElementById('emotion');
-        let streaming = false;
-        let intervalId = null;
-
-        startBtn.onclick = async function() {
-            if (streaming) return;
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-            video.style.display = 'block';
-            startBtn.style.display = 'none';
-            streaming = true;
-            intervalId = setInterval(captureAndSend, 1500);
+        document.getElementById('launch-emotion').onclick = function() {
+            const status = document.getElementById('launch-status');
+            status.textContent = 'Please wait...';
+            fetch('http://localhost:5000/launch', {method: 'POST'})
+                .then(res => {
+                    setTimeout(() => {
+                        if (res.ok) {
+                            status.textContent = 'Emotion detection started! Check for a new window.';
+                        } else {
+                            status.textContent = 'Could not start emotion detection. Is the launcher running?';
+                        }
+                    }, 3000);
+                })
+                .catch(() => {
+                    setTimeout(() => {
+                        status.textContent = '';
+                    }, 3000);
+                });
         };
-
-        async function captureAndSend() {
-            if (!streaming) return;
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob(async function(blob) {
-                const formData = new FormData();
-                formData.append('image', blob, 'frame.jpg');
-                try {
-                    const response = await fetch('/emotion/detect/', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await response.json();
-                    if (data.emotion) {
-                        emotionSpan.textContent = data.emotion;
-                    } else {
-                        emotionSpan.textContent = '-';
-                    }
-                } catch (err) {
-                    emotionSpan.textContent = 'Error';
-                }
-            }, 'image/jpeg');
-        }
     </script>
 </body>
 </html>

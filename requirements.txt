@@ -9,4 +9,4 @@ torchvision
 opencv-python
 Pillow
 yolov5
-
+flask

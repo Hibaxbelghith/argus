@@ -3,7 +3,32 @@ from deepface import DeepFace
 import numpy as np
 
 def run_live_emotion_detection():
-    cap = cv2.VideoCapture(0)
+    cap = None
+    for cam_index in range(3):
+        cap = cv2.VideoCapture(cam_index)
+        if cap.isOpened():
+            print(f"Using camera index {cam_index}")
+            break
+        cap.release()
+    else:
+        print("No camera found.")
+        return
+    
+    # Set camera to maximum supported resolution
+    resolutions = [
+        (1920, 1080), # Full HD
+        (1280, 720),  # HD
+        (640, 480)    # VGA fallback
+    ]
+    for w, h in resolutions:
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, w)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
+        actual_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        actual_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if actual_w >= w * 0.9 and actual_h >= h * 0.9:  # Allow some tolerance
+            print(f"Camera resolution set to {actual_w}x{actual_h}")
+            break
+    
     font = cv2.FONT_HERSHEY_SIMPLEX
     while True:
         ret, frame = cap.read()
@@ -28,7 +53,14 @@ def run_live_emotion_detection():
         except Exception as e:
             pass  # Ignore detection errors for smooth video
         cv2.imshow('Live Emotion Detection', frame)
+        # Killswitch: exit if 'q' is pressed or window is closed
         if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        # If window is closed, exit loop
+        if cv2.getWindowProperty('Live Emotion Detection', cv2.WND_PROP_VISIBLE) < 1:
             break
     cap.release()
     cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    run_live_emotion_detection()
