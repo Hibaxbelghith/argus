@@ -28,6 +28,7 @@ urlpatterns = [
     path('emotion/', include('emotion.urls')),
     path('detection/', include('detection.urls')),
     path('analytics/', include('analytics.urls')),  # Module Analytics
+    path('analytics/api/', include('analytics.advanced_urls')),  # 🆕 Advanced AI APIs
     path('notifications/', include('notifications.urls')),  # Module Notifications
 ]
 

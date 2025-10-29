@@ -100,8 +100,15 @@
                                 <a href="{% url 'detection:result' detection.pk %}">
                                     {% if detection.annotated_image %}
                                         <img src="{{ detection.annotated_image.url }}" class="card-img-top" alt="Detection" style="height: 250px; object-fit: cover;">
-                                    {% else %}
+                                    {% elif detection.original_image %}
                                         <img src="{{ detection.original_image.url }}" class="card-img-top" alt="Original" style="height: 250px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top d-flex align-items-center justify-content-center bg-secondary text-white" style="height: 250px;">
+                                            <div class="text-center">
+                                                <i class="bi bi-image" style="font-size: 3rem;"></i>
+                                                <p class="mb-0 mt-2">Simulation sans image</p>
+                                            </div>
+                                        </div>
                                     {% endif %}
                                 </a>
                                 <div class="card-body">

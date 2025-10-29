@@ -23,13 +23,15 @@ class DetectionAnalytics(models.Model):
         related_name='analytics'
     )
     period_type = models.CharField(max_length=10, choices=PERIOD_CHOICES)
-    period_start = models.DateTimeField()
-    period_end = models.DateTimeField()
+    period_start = models.DateTimeField(db_index=True)
+    period_end = models.DateTimeField(db_index=True)
     
     # Statistiques de base
     total_detections = models.IntegerField(default=0)
     total_objects_detected = models.IntegerField(default=0)
+    unique_objects = models.IntegerField(default=0, help_text="Number of unique object classes")
     avg_objects_per_detection = models.FloatField(default=0.0)
+    avg_confidence = models.FloatField(default=0.0, help_text="Average detection confidence")
     
     # Détection par catégorie (JSON: {classe: count})
     objects_by_class = models.TextField(default='{}', help_text="JSON: object classes and their counts")
@@ -37,11 +39,20 @@ class DetectionAnalytics(models.Model):
     # Tendances temporelles (JSON: {heure: count})
     detections_by_hour = models.TextField(default='{}', help_text="JSON: detections per hour")
     
+    # Détections par jour de la semaine (JSON: {jour: count})
+    detections_by_weekday = models.TextField(default='{}', help_text="JSON: detections by day of week")
+    
     # Objets suspects détectés
     suspicious_objects_count = models.IntegerField(default=0)
+    suspicious_objects_list = models.TextField(default='[]', help_text="JSON: list of suspicious objects detected")
     
     # Métriques de sécurité
     high_risk_detections = models.IntegerField(default=0, help_text="Detections with high-risk objects")
+    anomaly_count = models.IntegerField(default=0, help_text="Number of anomalies detected")
+    
+    # Statistiques de performance
+    peak_detection_hour = models.IntegerField(null=True, blank=True, help_text="Hour with most detections (0-23)")
+    peak_detection_count = models.IntegerField(default=0, help_text="Max detections in a single hour")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -80,6 +91,50 @@ class DetectionAnalytics(models.Model):
     def set_detections_by_hour(self, data):
         """Store detections by hour as JSON"""
         self.detections_by_hour = json.dumps(data)
+    
+    def get_detections_by_weekday(self):
+        """Parse JSON detections by weekday"""
+        try:
+            return json.loads(self.detections_by_weekday)
+        except json.JSONDecodeError:
+            return {}
+    
+    def set_detections_by_weekday(self, data):
+        """Store detections by weekday as JSON"""
+        self.detections_by_weekday = json.dumps(data)
+    
+    def get_suspicious_objects_list(self):
+        """Parse JSON suspicious objects list"""
+        try:
+            return json.loads(self.suspicious_objects_list)
+        except json.JSONDecodeError:
+            return []
+    
+    def set_suspicious_objects_list(self, data):
+        """Store suspicious objects list as JSON"""
+        self.suspicious_objects_list = json.dumps(data)
+    
+    @property
+    def detection_rate(self):
+        """Calculate detection rate per day"""
+        if self.period_type == 'daily':
+            return self.total_detections
+        elif self.period_type == 'weekly':
+            return self.total_detections / 7
+        elif self.period_type == 'monthly':
+            return self.total_detections / 30
+        return 0
+    
+    @property
+    def risk_level(self):
+        """Calculate overall risk level based on metrics"""
+        if self.high_risk_detections >= 5 or self.suspicious_objects_count >= 10:
+            return 'critical'
+        elif self.high_risk_detections >= 3 or self.suspicious_objects_count >= 5:
+            return 'high'
+        elif self.high_risk_detections >= 1 or self.suspicious_objects_count >= 2:
+            return 'medium'
+        return 'low'
 
 
 class ObjectTrend(models.Model):

@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
-from django.db.models import Count, Sum
-from datetime import timedelta
+from django.db.models import Count, Sum, Avg, Q
+from datetime import timedelta, datetime
 from .models import (
     DetectionAnalytics, 
     ObjectTrend, 
@@ -13,34 +13,31 @@ from .models import (
 from .services import AnalyticsEngine, SecurityAlertService
 from detection.models import DetectionResult
 import json
+from collections import defaultdict
 
 
 @login_required
 def analytics_dashboard(request):
     """
-    Main analytics dashboard with overview and insights
+    Dashboard Analytics principal avec rapports AI
     """
     user = request.user
     
-    # Générer les analytics du jour si nécessaire
-    today_analytics = AnalyticsEngine.generate_period_analytics(user, 'daily')
+    # Générer le rapport AI complet
+    from .ai_reports import AIReportGenerator
     
-    # Analytics de la semaine
-    week_start = timezone.now() - timedelta(days=7)
-    weekly_detections = DetectionResult.objects.filter(
+    period = request.GET.get('period', 'week')
+    report_generator = AIReportGenerator(user)
+    ai_report = report_generator.generate_comprehensive_report(period)
+    
+    # Récupérer les détections récentes
+    recent_detections = DetectionResult.objects.filter(user=user).order_by('-uploaded_at')[:10]
+    
+    # Alertes de sécurité actives
+    active_alerts = SecurityAlert.objects.filter(
         user=user,
-        uploaded_at__gte=week_start
-    )
-    
-    # Statistiques générales
-    total_detections = DetectionResult.objects.filter(user=user).count()
-    total_objects = sum(d.objects_detected for d in DetectionResult.objects.filter(user=user))
-    
-    # Top objets détectés
-    top_trends = ObjectTrend.objects.filter(user=user).order_by('-detection_count')[:10]
-    
-    # Alertes de sécurité
-    alert_summary = SecurityAlertService.get_alert_summary(user)
+        is_acknowledged=False
+    ).order_by('-created_at')[:5]
     
     # Insights récents
     recent_insights = AnalyticsInsight.objects.filter(
@@ -48,28 +45,48 @@ def analytics_dashboard(request):
         is_active=True
     ).order_by('-confidence_score', '-created_at')[:5]
     
-    # Analytics des 7 derniers jours
-    daily_analytics = DetectionAnalytics.objects.filter(
-        user=user,
-        period_type='daily'
-    ).order_by('-period_start')[:7]
-    
     # Préparer les données pour les graphiques
-    chart_data = {
-        'labels': [a.period_start.strftime('%d/%m') for a in reversed(daily_analytics)],
-        'detections': [a.total_detections for a in reversed(daily_analytics)],
-        'objects': [a.total_objects_detected for a in reversed(daily_analytics)],
+    if ai_report['trends']['daily_distribution']:
+        chart_labels = list(ai_report['trends']['daily_distribution'].keys())
+        chart_values = list(ai_report['trends']['daily_distribution'].values())
+    else:
+        chart_labels = []
+        chart_values = []
+    
+    # Statistiques d'alertes pour le template
+    alert_summary = {
+        'total': SecurityAlert.objects.filter(user=user).count(),
+        'unread': SecurityAlert.objects.filter(user=user, is_read=False).count(),
+        'critical': SecurityAlert.objects.filter(user=user, severity='critical', is_acknowledged=False).count(),
+        'high': SecurityAlert.objects.filter(user=user, severity='high', is_acknowledged=False).count(),
+        'medium': SecurityAlert.objects.filter(user=user, severity='medium', is_acknowledged=False).count(),
+        'low': SecurityAlert.objects.filter(user=user, severity='low', is_acknowledged=False).count(),
     }
     
+    # Préparer les données pour le graphique horaire
+    hourly_dist = ai_report['trends'].get('hourly_distribution', {})
+    hourly_labels = [f"{h}h" for h in range(24)]
+    hourly_values = [hourly_dist.get(h, 0) for h in range(24)]
+    
+    # Récupérer les tendances d'objets pour l'affichage
+    top_trends = ObjectTrend.objects.filter(user=user).order_by('-detection_count')[:10]
+    
     context = {
-        'today_analytics': today_analytics,
-        'total_detections': total_detections,
-        'total_objects': total_objects,
-        'weekly_count': weekly_detections.count(),
-        'top_trends': top_trends,
-        'alert_summary': alert_summary,
+        'ai_report': ai_report,
+        'period': period,
+        'recent_detections': recent_detections,
+        'active_alerts': active_alerts,
         'recent_insights': recent_insights,
-        'chart_data': json.dumps(chart_data),
+        'alert_summary': alert_summary,
+        'top_trends': top_trends,
+        'chart_data': {
+            'labels': chart_labels,
+            'values': chart_values
+        },
+        'chart_labels': json.dumps(chart_labels),
+        'chart_values': json.dumps(chart_values),
+        'hourly_labels': json.dumps(hourly_labels),
+        'hourly_values': json.dumps(hourly_values),
     }
     
     return render(request, 'analytics/dashboard.html', context)
@@ -273,3 +290,50 @@ def generate_report(request):
     }
     
     return render(request, 'analytics/report.html', context)
+
+
+@login_required
+def ai_report_view(request):
+    """
+    Génère et affiche un rapport AI détaillé
+    """
+    from .ai_reports import AIReportGenerator
+    
+    user = request.user
+    period = request.GET.get('period', 'week')
+    
+    # Générer le rapport AI
+    report_generator = AIReportGenerator(user)
+    ai_report = report_generator.generate_comprehensive_report(period)
+    
+    context = {
+        'ai_report': ai_report,
+        'period': period,
+        'user': user,
+    }
+    
+    return render(request, 'analytics/ai_report.html', context)
+
+
+@login_required
+def download_report_json(request):
+    """
+    Télécharge le rapport au format JSON
+    """
+    from .ai_reports import AIReportGenerator
+    import json
+    from django.http import JsonResponse
+    
+    user = request.user
+    period = request.GET.get('period', 'week')
+    
+    # Générer le rapport
+    report_generator = AIReportGenerator(user)
+    ai_report = report_generator.generate_comprehensive_report(period)
+    
+    # Convertir les dates en strings pour JSON
+    ai_report['start_date'] = ai_report['start_date'].isoformat()
+    ai_report['end_date'] = ai_report['end_date'].isoformat()
+    ai_report['generated_at'] = ai_report['generated_at'].isoformat()
+    
+    return JsonResponse(ai_report, json_dumps_params={'indent': 2})

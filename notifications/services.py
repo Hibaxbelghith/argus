@@ -44,25 +44,37 @@ class NotificationService:
         Returns:
             List of created Notification instances
         """
+        print(f"📧 NotificationService.create_notification_from_alert - Alert #{alert.id}")
+        
         user = alert.user
         preferences = NotificationService._get_or_create_preferences(user)
         
+        print(f"   User: {user.username}, Methods: {preferences.enabled_methods}")
+        
         # Vérifier si l'utilisateur veut ce type d'alerte
         if not NotificationService._should_notify(alert, preferences):
+            print(f"   ❌ Should not notify")
             return []
+        
+        print(f"   ✅ Should notify")
         
         # Vérifier les heures silencieuses
         if preferences.is_in_quiet_hours() and alert.severity != 'critical':
+            print(f"   ❌ Quiet hours")
             return []
         
         # Vérifier la fréquence maximale
         if not NotificationService._check_rate_limit(user, preferences):
+            print(f"   ❌ Rate limit exceeded")
             return []
         
         # Appliquer les règles personnalisées
         action = NotificationService._apply_rules(alert, user)
         if action == 'suppress':
+            print(f"   ❌ Suppressed by rules")
             return []
+        
+        print(f"   ✅ Creating notifications...")
         
         # Créer les notifications selon les méthodes activées
         notifications = []
@@ -71,8 +83,13 @@ class NotificationService:
             # Vérifier la sévérité minimale pour cette méthode
             min_severity = getattr(preferences, f'min_severity_{method}', 'low')
             
+            print(f"   Method: {method}, min_severity: {min_severity}, alert: {alert.severity}")
+            
             if SEVERITY_LEVELS[alert.severity] < SEVERITY_LEVELS[min_severity]:
+                print(f"      ❌ Severity too low")
                 continue
+            
+            print(f"      ✅ Creating {method} notification...")
             
             # Créer la notification
             notification = Notification.objects.create(
@@ -89,15 +106,22 @@ class NotificationService:
                 }
             )
             
+            print(f"      ✅ Notification #{notification.id} created")
+            
             # Gérer l'agrégation si activée
             if preferences.enable_aggregation:
                 NotificationService._handle_aggregation(notification, preferences)
             
             notifications.append(notification)
         
+        print(f"   📦 Total notifications created: {len(notifications)}")
+        
         # Envoyer les notifications
         for notification in notifications:
+            print(f"   📤 Sending {notification.delivery_method} notification #{notification.id}...")
             NotificationService._send_notification(notification)
+        
+        print(f"   ✅ Done! {len(notifications)} notifications sent")
         
         return notifications
     
@@ -242,10 +266,10 @@ class NotificationService:
                 NotificationService._log_event(notification, 'sent_email', f'Sent to {notification.user.email}')
             
             elif notification.delivery_method == 'sms':
-                # Placeholder pour SMS (nécessite intégration Twilio, etc.)
-                NotificationService._log_event(notification, 'sms_not_implemented', 'SMS delivery not configured')
-                notification.status = 'failed'
-                notification.save()
+                # Envoyer par SMS via Twilio
+                sms_sid = NotificationService._send_sms(notification)
+                notification.mark_as_sent()
+                NotificationService._log_event(notification, 'sent_sms', f'Sent SMS to {notification.user.phone_number} (SID: {sms_sid})')
             
             elif notification.delivery_method == 'push':
                 # Placeholder pour push notifications
@@ -254,6 +278,9 @@ class NotificationService:
                 notification.save()
         
         except Exception as e:
+            print(f"      ❌ EXCEPTION in _send_notification: {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
             notification.status = 'failed'
             notification.save()
             NotificationService._log_event(notification, 'failed', str(e))
@@ -283,6 +310,53 @@ Argus Security Platform
             [notification.user.email],
             fail_silently=False,
         )
+    
+    @staticmethod
+    def _send_sms(notification):
+        """Send SMS notification via Twilio"""
+        try:
+            from twilio.rest import Client
+            
+            print(f"      🔵 _send_sms called for notification #{notification.id}")
+            
+            # Vérifier la configuration Twilio
+            if not all([settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN, settings.TWILIO_PHONE_NUMBER]):
+                raise ValueError("Twilio credentials not configured in settings")
+            
+            print(f"      ✅ Twilio credentials OK")
+            
+            # Récupérer le numéro de téléphone de l'utilisateur
+            phone_number = notification.user.phone_number
+            
+            if not phone_number:
+                raise ValueError(f"No phone number configured for user {notification.user.username}")
+            
+            print(f"      ✅ Phone number: {phone_number}")
+            
+            # Créer le message SMS
+            sms_body = f"[{notification.severity.upper()}] {notification.title}\n\n{notification.message[:140]}"
+            
+            print(f"      ✅ SMS body: {sms_body[:50]}...")
+            
+            # Initialiser le client Twilio
+            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+            
+            print(f"      ✅ Twilio client initialized")
+            
+            # Envoyer le SMS
+            message = client.messages.create(
+                body=sms_body,
+                from_=settings.TWILIO_PHONE_NUMBER,
+                to=phone_number
+            )
+            
+            print(f"      ✅ SMS sent! SID: {message.sid}")
+            
+            return message.sid
+            
+        except Exception as e:
+            print(f"      ❌ SMS FAILED: {str(e)}")
+            raise Exception(f"Failed to send SMS: {str(e)}")
     
     @staticmethod
     def _log_event(notification, event, details=''):

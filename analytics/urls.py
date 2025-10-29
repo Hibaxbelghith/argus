@@ -24,11 +24,14 @@ urlpatterns = [
     
     # Rapports
     path('report/', views.generate_report, name='report'),
+    path('ai-report/', views.ai_report_view, name='ai_report'),
+    path('download-report/', views.download_report_json, name='download_report'),
     
     # === API REST COMPLÈTE ===
     
     # Stats et résumés
     path('api/stats/summary/', api_views.api_stats_summary, name='api_stats_summary'),
+    path('api/quick-insights/', api_views.api_quick_insights, name='api_quick_insights'),
     path('api/health/', api_views.api_health_check, name='api_health'),
     
     # Tendances
