@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),  # ✅ ajoute cette ligne si elle n'existe pas
     path('auth/', include('authentication.urls')),  # ton app d'authentification
     path('voicecontrol/', include('voicecontrol.urls')),
+    path('emotion/', include('emotion.urls')),
     path('detection/', include('detection.urls')),
 ]
 
