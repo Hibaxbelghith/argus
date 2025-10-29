@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'authentication',
     'crispy_forms', # Pour des formulaires plus jolis
     'voicecontrol',
+    'detection',
 ]
 
 MIDDLEWARE = [

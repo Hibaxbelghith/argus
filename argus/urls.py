@@ -22,9 +22,10 @@ from django.contrib import admin
 
 urlpatterns = [
     path('', __import__('argus.views').views.home, name='home'),
-    path('admin/', admin.site.urls),  # ✅ ajoute cette ligne si elle n’existe pas
-    path('auth/', include('authentication.urls')),  # ton app d’authentification
+    path('admin/', admin.site.urls),  # ✅ ajoute cette ligne si elle n'existe pas
+    path('auth/', include('authentication.urls')),  # ton app d'authentification
     path('voicecontrol/', include('voicecontrol.urls')),
+    path('detection/', include('detection.urls')),
 ]
 
 if settings.DEBUG:
