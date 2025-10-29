@@ -1,1 +1,686 @@
-[]
+[
+  {
+    "timestamp": "2025-10-29T19:00:20.838705",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7835000157356262,
+        "bbox": {
+          "xmin": 155,
+          "ymin": 1,
+          "xmax": 577,
+          "ymax": 475
+        },
+        "timestamp": "2025-10-29T19:00:20.830159"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190020_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:21.335103",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7403210401535034,
+        "bbox": {
+          "xmin": 145,
+          "ymin": 4,
+          "xmax": 586,
+          "ymax": 477
+        },
+        "timestamp": "2025-10-29T19:00:21.325779"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190021_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:21.651967",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.6182956099510193,
+        "bbox": {
+          "xmin": 145,
+          "ymin": 3,
+          "xmax": 583,
+          "ymax": 477
+        },
+        "timestamp": "2025-10-29T19:00:21.647623"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190021_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:21.957397",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.709946870803833,
+        "bbox": {
+          "xmin": 159,
+          "ymin": 2,
+          "xmax": 581,
+          "ymax": 478
+        },
+        "timestamp": "2025-10-29T19:00:21.952462"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190021_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:22.270538",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.6321913599967957,
+        "bbox": {
+          "xmin": 156,
+          "ymin": 2,
+          "xmax": 574,
+          "ymax": 479
+        },
+        "timestamp": "2025-10-29T19:00:22.263973"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190022_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:22.516129",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.6518798470497131,
+        "bbox": {
+          "xmin": 144,
+          "ymin": 0,
+          "xmax": 591,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:22.512110"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190022_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:22.761364",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.628195583820343,
+        "bbox": {
+          "xmin": 148,
+          "ymin": 5,
+          "xmax": 585,
+          "ymax": 474
+        },
+        "timestamp": "2025-10-29T19:00:22.755140"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190022_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:22.987924",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7450782656669617,
+        "bbox": {
+          "xmin": 159,
+          "ymin": 4,
+          "xmax": 575,
+          "ymax": 476
+        },
+        "timestamp": "2025-10-29T19:00:22.983924"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190022_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:23.276773",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.8158777356147766,
+        "bbox": {
+          "xmin": 157,
+          "ymin": 9,
+          "xmax": 573,
+          "ymax": 476
+        },
+        "timestamp": "2025-10-29T19:00:23.270655"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190023_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:23.668702",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.6467881798744202,
+        "bbox": {
+          "xmin": 150,
+          "ymin": 3,
+          "xmax": 580,
+          "ymax": 477
+        },
+        "timestamp": "2025-10-29T19:00:23.662075"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190023_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:23.962949",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.5646063089370728,
+        "bbox": {
+          "xmin": 151,
+          "ymin": 4,
+          "xmax": 582,
+          "ymax": 478
+        },
+        "timestamp": "2025-10-29T19:00:23.957097"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190023_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:24.223447",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.5922513008117676,
+        "bbox": {
+          "xmin": 149,
+          "ymin": 4,
+          "xmax": 585,
+          "ymax": 475
+        },
+        "timestamp": "2025-10-29T19:00:24.218151"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190024_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:24.492593",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7514735460281372,
+        "bbox": {
+          "xmin": 151,
+          "ymin": 8,
+          "xmax": 579,
+          "ymax": 475
+        },
+        "timestamp": "2025-10-29T19:00:24.483092"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190024_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:24.954491",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.519914448261261,
+        "bbox": {
+          "xmin": 157,
+          "ymin": 4,
+          "xmax": 572,
+          "ymax": 478
+        },
+        "timestamp": "2025-10-29T19:00:24.941485"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190024_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:25.285852",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7658764719963074,
+        "bbox": {
+          "xmin": 155,
+          "ymin": 5,
+          "xmax": 570,
+          "ymax": 476
+        },
+        "timestamp": "2025-10-29T19:00:25.280065"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190025_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:25.550560",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.6908483505249023,
+        "bbox": {
+          "xmin": 0,
+          "ymin": 15,
+          "xmax": 546,
+          "ymax": 476
+        },
+        "timestamp": "2025-10-29T19:00:25.546159"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190025_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:25.774406",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.8405542969703674,
+        "bbox": {
+          "xmin": 2,
+          "ymin": 17,
+          "xmax": 603,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:25.769102"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190025_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:26.011513",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.8403506875038147,
+        "bbox": {
+          "xmin": 0,
+          "ymin": 26,
+          "xmax": 566,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:26.007514"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190026_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:26.270527",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.8122647404670715,
+        "bbox": {
+          "xmin": 0,
+          "ymin": 25,
+          "xmax": 555,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:26.265120"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190026_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:26.743753",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.792769730091095,
+        "bbox": {
+          "xmin": 0,
+          "ymin": 24,
+          "xmax": 560,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:26.737041"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190026_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:26.992960",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.8681089282035828,
+        "bbox": {
+          "xmin": 0,
+          "ymin": 29,
+          "xmax": 560,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:26.986254"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190026_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:27.642186",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7922770977020264,
+        "bbox": {
+          "xmin": 0,
+          "ymin": 32,
+          "xmax": 568,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:27.634333"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190027_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:28.107609",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.738237202167511,
+        "bbox": {
+          "xmin": 5,
+          "ymin": 33,
+          "xmax": 584,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:28.101249"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190028_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:28.858742",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.6656195521354675,
+        "bbox": {
+          "xmin": 0,
+          "ymin": 21,
+          "xmax": 562,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:28.850534"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190028_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:29.485861",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7433207631111145,
+        "bbox": {
+          "xmin": 180,
+          "ymin": 4,
+          "xmax": 604,
+          "ymax": 479
+        },
+        "timestamp": "2025-10-29T19:00:29.476414"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190029_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:30.149861",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.5297585725784302,
+        "bbox": {
+          "xmin": 1,
+          "ymin": 6,
+          "xmax": 533,
+          "ymax": 478
+        },
+        "timestamp": "2025-10-29T19:00:30.140323"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190030_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:30.515612",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.5442501902580261,
+        "bbox": {
+          "xmin": 207,
+          "ymin": 5,
+          "xmax": 581,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:30.509613"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190030_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:30.910882",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.6204180121421814,
+        "bbox": {
+          "xmin": 198,
+          "ymin": 7,
+          "xmax": 589,
+          "ymax": 479
+        },
+        "timestamp": "2025-10-29T19:00:30.899880"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190030_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:31.280876",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.5422548055648804,
+        "bbox": {
+          "xmin": 2,
+          "ymin": 7,
+          "xmax": 531,
+          "ymax": 477
+        },
+        "timestamp": "2025-10-29T19:00:31.273876"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190031_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:31.553388",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7921862602233887,
+        "bbox": {
+          "xmin": 198,
+          "ymin": 6,
+          "xmax": 591,
+          "ymax": 478
+        },
+        "timestamp": "2025-10-29T19:00:31.548802"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190031_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:31.807458",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.6672865748405457,
+        "bbox": {
+          "xmin": 196,
+          "ymin": 7,
+          "xmax": 587,
+          "ymax": 478
+        },
+        "timestamp": "2025-10-29T19:00:31.801824"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190031_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:32.089148",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.7586513161659241,
+        "bbox": {
+          "xmin": 198,
+          "ymin": 6,
+          "xmax": 586,
+          "ymax": 478
+        },
+        "timestamp": "2025-10-29T19:00:32.081946"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190032_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:32.372040",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.629102885723114,
+        "bbox": {
+          "xmin": 0,
+          "ymin": 10,
+          "xmax": 563,
+          "ymax": 477
+        },
+        "timestamp": "2025-10-29T19:00:32.365251"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190032_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:32.623941",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.8517201542854309,
+        "bbox": {
+          "xmin": 3,
+          "ymin": 22,
+          "xmax": 601,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:32.617908"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190032_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:32.868189",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.8360920548439026,
+        "bbox": {
+          "xmin": 3,
+          "ymin": 32,
+          "xmax": 585,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:32.862682"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190032_person.jpg",
+    "camera_source": "0"
+  },
+  {
+    "timestamp": "2025-10-29T19:00:33.749347",
+    "detection_count": 1,
+    "detections": [
+      {
+        "class": "person",
+        "confidence": 0.8515927791595459,
+        "bbox": {
+          "xmin": 4,
+          "ymin": 35,
+          "xmax": 587,
+          "ymax": 480
+        },
+        "timestamp": "2025-10-29T19:00:33.744346"
+      }
+    ],
+    "snapshot": "media/security/snapshots\\snapshot_20251029_190033_person.jpg",
+    "camera_source": "0"
+  }
+]
