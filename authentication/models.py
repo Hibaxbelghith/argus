@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     # photo de référence pour la reconnaissance faciale
     photo = models.ImageField(upload_to='faces/', blank=True, null=True)
+    
 
     def __str__(self):
         return self.username
