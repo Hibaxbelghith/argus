@@ -27,6 +27,8 @@ urlpatterns = [
     path('voicecontrol/', include('voicecontrol.urls')),
     path('emotion/', include('emotion.urls')),
     path('detection/', include('detection.urls')),
+    path('analytics/', include('analytics.urls')),  # Module Analytics
+    path('notifications/', include('notifications.urls')),  # Module Notifications
 ]
 
 if settings.DEBUG:

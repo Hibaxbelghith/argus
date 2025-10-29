@@ -1,0 +1,239 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Argus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">🛡️ Argus</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'analytics:dashboard' %}">Analytics</a>
+                <a class="nav-link" href="{% url 'notifications:dashboard' %}">Notifications</a>
+                <a class="nav-link" href="{% url 'detection:home' %}">Détection</a>
+                <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4"><i class="bi bi-graph-up"></i> Analytics Dashboard</h1>
+            </div>
+        </div>
+
+        <!-- Statistiques générales -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Détections</h5>
+                        <h2>{{ total_detections }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Objets</h5>
+                        <h2>{{ total_objects }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <h5 class="card-title">Cette Semaine</h5>
+                        <h2>{{ weekly_count }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Alertes Non Lues</h5>
+                        <h2>{{ alert_summary.unread }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-graph-up"></i> Tendances des Détections (7 derniers jours)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="detectionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-pie-chart"></i> Alertes par Sévérité</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="badge bg-danger">Critique</span>
+                                <span class="badge bg-primary rounded-pill">{{ alert_summary.critical }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Haute</span>
+                                <span class="badge bg-primary rounded-pill">{{ alert_summary.high }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">Moyenne</span>
+                                <span class="badge bg-primary rounded-pill">{{ alert_summary.medium }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">Basse</span>
+                                <span class="badge bg-primary rounded-pill">{{ alert_summary.low }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Objets Détectés -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-list-ol"></i> Top Objets Détectés</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Objet</th>
+                                    <th>Détections</th>
+                                    <th>Tendance</th>
+                                    <th>Anomalie</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trend in top_trends %}
+                                <tr>
+                                    <td>{{ trend.object_class }}</td>
+                                    <td><span class="badge bg-primary">{{ trend.detection_count }}</span></td>
+                                    <td>
+                                        {% if trend.trend_direction == 'increasing' %}
+                                        <i class="bi bi-arrow-up text-danger"></i>
+                                        {% elif trend.trend_direction == 'decreasing' %}
+                                        <i class="bi bi-arrow-down text-success"></i>
+                                        {% else %}
+                                        <i class="bi bi-dash text-secondary"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if trend.is_anomaly %}
+                                        <span class="badge bg-danger">Oui ({{ trend.anomaly_score|floatformat:2 }})</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Non</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <a href="{% url 'analytics:trends' %}" class="btn btn-primary btn-sm">Voir toutes les tendances</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights Récents -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb"></i> Insights Récents</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for insight in recent_insights %}
+                        <div class="alert alert-info" role="alert">
+                            <h6 class="alert-heading">{{ insight.title }}</h6>
+                            <p class="mb-1">{{ insight.description }}</p>
+                            <small>Confiance: {{ insight.confidence_score|floatformat:2 }}</small>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">Aucun insight disponible pour le moment.</p>
+                        {% endfor %}
+                        <a href="{% url 'analytics:insights' %}" class="btn btn-primary btn-sm">Voir tous les insights</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightning"></i> Actions Rapides</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="{% url 'analytics:alerts' %}" class="btn btn-warning me-2">
+                            <i class="bi bi-exclamation-triangle"></i> Voir Alertes ({{ alert_summary.unread }} non lues)
+                        </a>
+                        <a href="{% url 'analytics:report' %}?period=weekly" class="btn btn-info me-2">
+                            <i class="bi bi-file-earmark-text"></i> Générer Rapport Hebdomadaire
+                        </a>
+                        <a href="{% url 'notifications:predictive' %}" class="btn btn-success me-2">
+                            <i class="bi bi-crystal-ball"></i> Alertes Prédictives
+                        </a>
+                        <a href="{% url 'detection:home' %}" class="btn btn-primary">
+                            <i class="bi bi-camera"></i> Nouvelle Détection
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Graphique des détections
+        const chartData = {{ chart_data|safe }};
+        const ctx = document.getElementById('detectionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Détections',
+                    data: chartData.detections,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }, {
+                    label: 'Objets Détectés',
+                    data: chartData.objects,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

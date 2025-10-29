@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'voicecontrol',
     'detection',
     'emotion',
+    'analytics',  # Module Analytics de Détection
+    'notifications',  # Module Notifications Intelligentes
 ]
 
 MIDDLEWARE = [
