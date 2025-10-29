@@ -269,28 +269,35 @@ class SecurityCamera:
         
     def connect_camera(self):
         """
-        Connect to camera source (webcam or IP camera)
+        Connect to camera source (webcam, IP camera, or video file)
         
         Returns:
             bool: True if connection successful, False otherwise
         """
         try:
+            # Determine if source is a file path
+            is_file = isinstance(self.camera_source, str) and (
+                self.camera_source.endswith(('.mp4', '.avi', '.mov', '.mkv', '.webm'))
+            )
+            
             self.camera = cv2.VideoCapture(self.camera_source)
             
-            # Set camera properties for better performance
-            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-            self.camera.set(cv2.CAP_PROP_FPS, 30)
+            # Set camera properties (only for live cameras, not files)
+            if not is_file:
+                self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+                self.camera.set(cv2.CAP_PROP_FPS, 30)
             
             if not self.camera.isOpened():
-                print(f"❌ Failed to open camera: {self.camera_source}")
+                print(f"Failed to open source: {self.camera_source}")
                 return False
             
-            print(f"✅ Camera connected: {self.camera_source}")
+            source_type = "video file" if is_file else "camera"
+            print(f"Connected to {source_type}: {self.camera_source}")
             return True
             
         except Exception as e:
-            print(f"❌ Error connecting to camera: {str(e)}")
+            print(f"Error connecting to camera: {str(e)}")
             return False
     
     def disconnect_camera(self):
