@@ -26,6 +26,8 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),  # ton app d'authentification
     path('voicecontrol/', include('voicecontrol.urls')),
     path('detection/', include('detection.urls')),
+    path('analytics/', include('analytics.urls')),  # Module Analytics
+    path('notifications/', include('notifications.urls')),  # Module Notifications
 ]
 
 if settings.DEBUG:
