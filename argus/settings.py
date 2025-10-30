@@ -1,3 +1,7 @@
+# CSRF trusted origins for ngrok
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app',
+]
 """
 Django settings for argus project.
 
@@ -65,7 +69,10 @@ ROOT_URLCONF = 'argus.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'authentication/templates'], 
+        'DIRS': [
+            BASE_DIR / 'authentication/templates',
+            BASE_DIR / 'argus/templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
