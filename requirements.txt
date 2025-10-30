@@ -12,6 +12,10 @@ yolov5
 flask
 spacy
 
+opencv-contrib-python==4.12.0.88
+sqlparse==0.5.3
+asgiref==3.10.0
+
 # IA & Machine Learning pour Analytics
 scikit-learn>=1.3.0
 xgboost>=2.0.0

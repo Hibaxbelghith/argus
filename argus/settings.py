@@ -52,7 +52,11 @@ INSTALLED_APPS = [
     'emotion',
     'analytics',  # Module Analytics de Détection
     'notifications',  # Module Notifications Intelligentes
+    'mouvment_detection',
 ]
+
+# Custom user model
+AUTH_USER_MODEL = 'authentication.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
