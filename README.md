@@ -10,7 +10,9 @@ Elle intègre plusieurs modules :
 - ⚠️ Système d’alertes  
 - 📊 Historique des alertes et analyses automatiques  
 
----
+## Live Emotion Detection
+Detect emotions in real time using your webcam, with results shown as overlays on the video feed.
+Start it with: `python emotion_launcher.py`
 
 ## ⚙️ Technologies utilisées
 - **Backend** : Django (Python 3.13)

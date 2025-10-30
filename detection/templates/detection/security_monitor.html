@@ -195,16 +195,33 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label">Camera Source</label>
+                                <select class="form-select" id="cameraSourceType" onchange="updateSourceInput()">
+                                    <option value="webcam">Webcam</option>
+                                    <option value="video">Video File</option>
+                                    <option value="ip">IP Camera</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3" id="webcamOptions">
+                                <label class="form-label">Select Webcam</label>
                                 <select class="form-select" id="cameraSource">
                                     <option value="0">Default Webcam (0)</option>
                                     <option value="1">Webcam 1</option>
                                     <option value="2">Webcam 2</option>
                                 </select>
-                                <small class="text-muted">Select camera or enter IP camera URL</small>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3" id="videoOptions" style="display: none;">
+                                <label class="form-label">Video File Path</label>
+                                <input type="text" class="form-control" id="videoPath" placeholder="e.g., media/test_video.mp4">
+                                <small class="text-muted">Place video file in media/ folder</small>
+                            </div>
+                            <div class="col-md-12 mb-3" id="ipOptions" style="display: none;">
+                                <label class="form-label">IP Camera URL</label>
+                                <input type="text" class="form-control" id="ipUrl" placeholder="e.g., rtsp://192.168.1.100:554/stream">
+                                <small class="text-muted">RTSP or HTTP stream URL</small>
+                            </div>
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label">Target Classes</label>
                                 <select class="form-select" id="targetClasses" multiple>
                                     {% for cls in target_classes %}
@@ -214,6 +231,17 @@
                                 <small class="text-muted">Hold Ctrl to select multiple</small>
                             </div>
                         </div>
+                        
+                        <!-- Help Section -->
+                        <div class="alert alert-info">
+                            <strong><i class="bi bi-info-circle"></i> No Webcam?</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Use a test video file (select "Video File" above)</li>
+                                <li>Download sample: <a href="https://sample-videos.com/" target="_blank" class="text-white">sample-videos.com</a></li>
+                                <li>Or use IP camera/phone camera app</li>
+                            </ul>
+                        </div>
+                        
                         <div class="d-grid gap-2 d-md-flex justify-content-md-center">
                             <button class="btn btn-start" id="startBtn" onclick="startMonitoring()">
                                 <i class="bi bi-play-circle"></i> Start Monitoring
@@ -275,9 +303,36 @@
         let isMonitoring = false;
         let detectionInterval = null;
 
+        // Update camera source input based on type
+        function updateSourceInput() {
+            const type = document.getElementById('cameraSourceType').value;
+            document.getElementById('webcamOptions').style.display = type === 'webcam' ? 'block' : 'none';
+            document.getElementById('videoOptions').style.display = type === 'video' ? 'block' : 'none';
+            document.getElementById('ipOptions').style.display = type === 'ip' ? 'block' : 'none';
+        }
+
+        // Get the selected camera source
+        function getCameraSource() {
+            const type = document.getElementById('cameraSourceType').value;
+            if (type === 'webcam') {
+                return document.getElementById('cameraSource').value;
+            } else if (type === 'video') {
+                return document.getElementById('videoPath').value;
+            } else {
+                return document.getElementById('ipUrl').value;
+            }
+        }
+
         // Start monitoring
         function startMonitoring() {
-            const cameraSource = document.getElementById('cameraSource').value;
+            const cameraSource = getCameraSource();
+            
+            // Validate input
+            if (!cameraSource || cameraSource.trim() === '') {
+                alert('Please enter a camera source');
+                return;
+            }
+
             const targetClassesSelect = document.getElementById('targetClasses');
             const targetClasses = Array.from(targetClassesSelect.selectedOptions).map(opt => opt.value);
 

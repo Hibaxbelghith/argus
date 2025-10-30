@@ -153,22 +153,30 @@
                                     <i class="bi bi-download"></i> Download Annotated Image
                                 </a>
                             </div>
-                        {% else %}
+                        {% elif detection.original_image %}
                             <div class="alert alert-info">
                                 <i class="bi bi-info-circle"></i> No objects detected in this image.
                             </div>
                             <div class="text-center">
                                 <img src="{{ detection.original_image.url }}" alt="Original Image" class="result-image">
                             </div>
+                        {% else %}
+                            <div class="alert alert-warning text-center">
+                                <i class="bi bi-image" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3">Simulation sans image</h5>
+                                <p>Cette détection a été créée par simulation pour tester le système de notifications.</p>
+                            </div>
                         {% endif %}
 
                         <!-- Original Image -->
+                        {% if detection.original_image %}
                         <div class="mt-4">
                             <h5>Original Image</h5>
                             <div class="text-center">
                                 <img src="{{ detection.original_image.url }}" alt="Original Image" class="result-image" style="max-width: 400px;">
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -428,3 +428,54 @@ def api_health_check(request):
         'stats': stats,
         'timestamp': timezone.now().isoformat()
     })
+
+
+@login_required
+@require_http_methods(["GET"])
+def api_quick_insights(request):
+    """
+    GET /analytics/api/quick-insights/
+    Retourne un résumé rapide des insights AI pour le dashboard
+    """
+    from .ai_reports import AIReportGenerator
+    
+    user = request.user
+    period = request.GET.get('period', 'day')
+    
+    try:
+        # Générer le rapport AI
+        generator = AIReportGenerator(user)
+        report = generator.generate_comprehensive_report(period)
+        
+        # Créer un résumé compact pour le dashboard
+        quick_insights = {
+            'security': {
+                'score': report['security']['score'],
+                'level': report['security']['level'],
+                'risks_count': len(report['security']['risks'])
+            },
+            'summary': {
+                'total_detections': report['summary']['total_detections'],
+                'suspicious_count': report['summary']['suspicious_detections'],
+                'trend': report['summary']['trend'],
+                'change_percent': report['summary']['change_percent']
+            },
+            'top_objects': report['trends']['top_objects'][:5] if report['trends']['top_objects'] else [],
+            'top_recommendation': report['recommendations'][0] if report['recommendations'] else None,
+            'patterns_count': len(report['patterns']['anomalies']) if report['patterns']['anomalies'] else 0,
+            'has_predictions': report['predictions'] is not None
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'data': quick_insights,
+            'period': period,
+            'timestamp': timezone.now().isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'message': 'Erreur lors de la génération des insights AI'
+        }, status=500)

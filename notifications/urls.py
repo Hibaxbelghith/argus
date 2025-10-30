@@ -11,6 +11,9 @@ urlpatterns = [
     # Notifications individuelles
     path('<int:pk>/', views.notification_detail, name='detail'),
     path('mark-all-read/', views.mark_all_read, name='mark_all_read'),
+    path('<int:pk>/delete/', views.delete_notification, name='delete_notification'),
+    path('delete-all-read/', views.delete_all_read, name='delete_all_read'),
+    path('delete-all/', views.delete_all_notifications, name='delete_all'),
     
     # Préférences
     path('preferences/', views.preferences_view, name='preferences'),

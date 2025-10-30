@@ -22,6 +22,27 @@ class NotificationPreference(models.Model):
         related_name='notification_preferences'
     )
     
+    # Contact information for SMS
+    phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="Phone number for SMS notifications (E.164 format: +33612345678)"
+    )
+    phone_verified = models.BooleanField(
+        default=False,
+        help_text="Whether phone number has been verified"
+    )
+    phone_verification_code = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True
+    )
+    phone_verification_expires = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    
     # Canaux de notification activés
     enabled_methods = models.JSONField(
         default=list,
@@ -43,6 +64,11 @@ class NotificationPreference(models.Model):
         max_length=10,
         choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High'), ('critical', 'Critical')],
         default='critical'
+    )
+    min_severity_push = models.CharField(
+        max_length=10,
+        choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High'), ('critical', 'Critical')],
+        default='medium'
     )
     
     # Heures silencieuses (Do Not Disturb)
@@ -94,6 +120,57 @@ class NotificationPreference(models.Model):
             return now >= self.quiet_hours_start or now <= self.quiet_hours_end
         else:
             return self.quiet_hours_start <= now <= self.quiet_hours_end
+    
+    def can_send_via_method(self, method, severity='medium'):
+        """Check if notification can be sent via method based on preferences"""
+        # Check if method is enabled
+        if method not in self.enabled_methods:
+            return False
+        
+        # Check severity threshold
+        severity_levels = {'low': 0, 'medium': 1, 'high': 2, 'critical': 3}
+        current_level = severity_levels.get(severity, 1)
+        
+        min_severity_field = f'min_severity_{method}'
+        if hasattr(self, min_severity_field):
+            min_severity = getattr(self, min_severity_field)
+            min_level = severity_levels.get(min_severity, 1)
+            if current_level < min_level:
+                return False
+        
+        # Check quiet hours for intrusive methods (SMS, Push)
+        if method in ['sms', 'push'] and self.is_in_quiet_hours():
+            # Only allow critical notifications during quiet hours
+            if severity != 'critical':
+                return False
+        
+        return True
+    
+    def generate_phone_verification_code(self):
+        """Generate a 6-digit verification code for phone"""
+        import random
+        code = str(random.randint(100000, 999999))
+        self.phone_verification_code = code
+        self.phone_verification_expires = timezone.now() + timedelta(minutes=10)
+        self.save()
+        return code
+    
+    def verify_phone(self, code):
+        """Verify phone number with code"""
+        if not self.phone_verification_code or not self.phone_verification_expires:
+            return False
+        
+        if timezone.now() > self.phone_verification_expires:
+            return False
+        
+        if code == self.phone_verification_code:
+            self.phone_verified = True
+            self.phone_verification_code = None
+            self.phone_verification_expires = None
+            self.save()
+            return True
+        
+        return False
 
 
 class Notification(models.Model):
@@ -173,6 +250,125 @@ class Notification(models.Model):
         self.status = 'sent'
         self.sent_at = timezone.now()
         self.save()
+    
+    @property
+    def is_read(self):
+        """Check if notification has been read"""
+        return self.read_at is not None
+    
+    def get_age_minutes(self):
+        """Get notification age in minutes"""
+        return (timezone.now() - self.created_at).total_seconds() / 60
+
+
+class SMSDeliveryLog(models.Model):
+    """
+    Logs SMS delivery attempts and status
+    """
+    STATUS_CHOICES = [
+        ('queued', 'Queued'),
+        ('sending', 'Sending'),
+        ('sent', 'Sent'),
+        ('delivered', 'Delivered'),
+        ('failed', 'Failed'),
+        ('undelivered', 'Undelivered'),
+    ]
+    
+    notification = models.ForeignKey(
+        Notification,
+        on_delete=models.CASCADE,
+        related_name='sms_logs'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sms_logs'
+    )
+    
+    # SMS details
+    phone_number = models.CharField(max_length=20)
+    message_body = models.TextField()
+    sms_provider = models.CharField(
+        max_length=20,
+        default='twilio',
+        choices=[('twilio', 'Twilio'), ('other', 'Other')]
+    )
+    
+    # Delivery status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='queued')
+    provider_message_id = models.CharField(max_length=100, blank=True, null=True)
+    provider_status = models.CharField(max_length=50, blank=True, null=True)
+    
+    # Error tracking
+    error_code = models.CharField(max_length=20, blank=True, null=True)
+    error_message = models.TextField(blank=True, null=True)
+    
+    # Cost tracking
+    cost = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    cost_currency = models.CharField(max_length=3, default='USD')
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    failed_at = models.DateTimeField(null=True, blank=True)
+    
+    # Retry tracking
+    retry_count = models.IntegerField(default=0)
+    max_retries = models.IntegerField(default=3)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'SMS Delivery Log'
+        verbose_name_plural = 'SMS Delivery Logs'
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['provider_message_id']),
+        ]
+    
+    def __str__(self):
+        return f"SMS to {self.phone_number} - {self.status}"
+    
+    def mark_as_sent(self, message_id=None):
+        """Mark SMS as sent"""
+        self.status = 'sent'
+        self.sent_at = timezone.now()
+        if message_id:
+            self.provider_message_id = message_id
+        self.save()
+    
+    def mark_as_delivered(self):
+        """Mark SMS as delivered"""
+        self.status = 'delivered'
+        self.delivered_at = timezone.now()
+        self.save()
+    
+    def mark_as_failed(self, error_code=None, error_message=None):
+        """Mark SMS as failed"""
+        self.status = 'failed'
+        self.failed_at = timezone.now()
+        if error_code:
+            self.error_code = error_code
+        if error_message:
+            self.error_message = error_message
+        self.save()
+    
+    def can_retry(self):
+        """Check if SMS can be retried"""
+        return self.retry_count < self.max_retries and self.status in ['failed', 'queued']
+    
+    def increment_retry(self):
+        """Increment retry counter"""
+        self.retry_count += 1
+        self.status = 'queued'
+        self.save()
+
+
+class UserNotificationPreference(NotificationPreference):
+    """Alias for backward compatibility"""
+    class Meta:
+        proxy = True
 
 
 class NotificationRule(models.Model):

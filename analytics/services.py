@@ -25,6 +25,11 @@ HIGH_RISK_OBJECTS = [
     'gun', 'weapon', 'fire', 'knife'
 ]
 
+# Objets de surveillance (sévérité MEDIUM pour SMS)
+MONITORED_OBJECTS = [
+    'person', 'car', 'dog', 'cat', 'motorcycle', 'truck'
+]
+
 # Heures normales d'activité (8h-22h)
 NORMAL_ACTIVITY_HOURS = range(8, 22)
 
@@ -288,6 +293,7 @@ class SecurityAlertService:
         # Vérifier les objets à haut risque
         high_risk_objects = []
         suspicious_objects = []
+        monitored_objects = []
         
         for obj in detection_data:
             obj_class = obj.get('class', 'unknown').lower()
@@ -303,6 +309,13 @@ class SecurityAlertService:
             # Objet suspect
             elif any(suspect in obj_class for suspect in SUSPICIOUS_OBJECTS):
                 suspicious_objects.append({
+                    'class': obj_class,
+                    'confidence': confidence
+                })
+            
+            # Objet sous surveillance
+            elif any(monitor in obj_class for monitor in MONITORED_OBJECTS):
+                monitored_objects.append({
                     'class': obj_class,
                     'confidence': confidence
                 })
@@ -335,6 +348,23 @@ class SecurityAlertService:
                 message=f"{len(suspicious_objects)} objet(s) suspect(s) détecté(s): {', '.join(o['class'] for o in suspicious_objects)}",
                 context_data=json.dumps({
                     'objects': suspicious_objects,
+                    'detection_id': detection.id,
+                    'timestamp': detection.uploaded_at.isoformat()
+                })
+            )
+            alerts.append(alert)
+        
+        # Créer alerte pour objets sous surveillance (person, car, dog, etc.)
+        if monitored_objects:
+            alert = SecurityAlert.objects.create(
+                user=detection.user,
+                detection=detection,
+                alert_type='suspicious_object',
+                severity='medium',
+                title=f"👁️ Détection surveillance: {', '.join(set(o['class'] for o in monitored_objects))}",
+                message=f"{len(monitored_objects)} objet(s) surveillé(s) détecté(s): {', '.join(o['class'] for o in monitored_objects)}",
+                context_data=json.dumps({
+                    'objects': monitored_objects,
                     'detection_id': detection.id,
                     'timestamp': detection.uploaded_at.isoformat()
                 })

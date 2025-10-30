@@ -7,6 +7,8 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     # photo de référence pour la reconnaissance faciale
     photo = models.ImageField(upload_to='faces/', blank=True, null=True)
+    # Numéro de téléphone pour les notifications SMS
+    phone_number = models.CharField(max_length=20, blank=True, null=True, help_text="Format: +33612345678")
     
 
     def __str__(self):

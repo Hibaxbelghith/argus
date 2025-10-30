@@ -1,0 +1,419 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport AI Détaillé - Argus Security</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            padding: 30px 0;
+        }
+        
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .report-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .report-subtitle {
+            font-size: 1.2rem;
+            color: #6b7280;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .narrative-section {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            margin: 30px 0;
+            line-height: 1.8;
+        }
+        
+        .table-report {
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .table-report th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+        }
+        
+        .table-report td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .badge-custom {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .security-score-big {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #10b981 0deg,
+                #10b981 calc(3.6deg * var(--score)),
+                #e5e7eb calc(3.6deg * var(--score)),
+                #e5e7eb 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+        
+        .security-score-big::before {
+            content: '';
+            width: 160px;
+            height: 160px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+        }
+        
+        .score-text {
+            position: relative;
+            z-index: 1;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .report-container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <!-- Header -->
+        <div class="report-header">
+            <div class="report-title">
+                <i class="bi bi-shield-check"></i> Rapport Analytics AI
+            </div>
+            <div class="report-subtitle">
+                Argus Security System - Analyse Intelligente
+            </div>
+            <p class="text-muted mt-3">
+                Généré le {{ ai_report.generated_at|date:"d/m/Y à H:i" }} | 
+                Période: {{ ai_report.start_date|date:"d/m/Y" }} - {{ ai_report.end_date|date:"d/m/Y" }}
+            </p>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="text-center mb-4 no-print">
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Imprimer
+            </button>
+            <a href="{% url 'analytics:download_report' %}?period={{ period }}" class="btn btn-success">
+                <i class="bi bi-download"></i> Télécharger JSON
+            </a>
+            <a href="{% url 'analytics:dashboard' %}?period={{ period }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retour Dashboard
+            </a>
+        </div>
+
+        <!-- Résumé Exécutif -->
+        <div class="section">
+            <h2 class="section-title"><i class="bi bi-clipboard-data"></i> Résumé Exécutif</h2>
+            
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <i class="bi bi-bar-chart-fill" style="font-size: 2rem;"></i>
+                    <div class="stat-value">{{ ai_report.summary.total_detections }}</div>
+                    <div class="stat-label">DÉTECTIONS TOTALES</div>
+                </div>
+                
+                <div class="stat-box">
+                    <i class="bi bi-box-seam" style="font-size: 2rem;"></i>
+                    <div class="stat-value">{{ ai_report.summary.total_objects }}</div>
+                    <div class="stat-label">OBJETS DÉTECTÉS</div>
+                </div>
+                
+                <div class="stat-box">
+                    <i class="bi bi-exclamation-triangle-fill" style="font-size: 2rem;"></i>
+                    <div class="stat-value">{{ ai_report.summary.suspicious_detections }}</div>
+                    <div class="stat-label">SUSPECTS</div>
+                </div>
+                
+                <div class="stat-box">
+                    <i class="bi bi-bullseye" style="font-size: 2rem;"></i>
+                    <div class="stat-value">{{ ai_report.summary.avg_confidence|floatformat:0 }}%</div>
+                    <div class="stat-label">CONFIANCE MOY.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analyse Narrative -->
+        <div class="section">
+            <h2 class="section-title"><i class="bi bi-robot"></i> Analyse AI Narrative</h2>
+            <div class="narrative-section">
+                {{ ai_report.narrative|linebreaks }}
+            </div>
+        </div>
+
+        <!-- Score de Sécurité -->
+        <div class="section">
+            <h2 class="section-title"><i class="bi bi-shield-check"></i> Évaluation de Sécurité</h2>
+            
+            <div class="text-center">
+                <div class="security-score-big" style="--score: {{ ai_report.security.security_score }}">
+                    <div class="score-text">{{ ai_report.security.security_score }}</div>
+                </div>
+                <h3 class="text-{{ ai_report.security.level_color }}">
+                    Niveau: {{ ai_report.security.level|upper }}
+                </h3>
+            </div>
+
+            {% if ai_report.security.risks %}
+            <h4 class="mt-4">Risques Identifiés ({{ ai_report.security.risk_count }})</h4>
+            <table class="table-report">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Sévérité</th>
+                        <th>Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for risk in ai_report.security.risks %}
+                    <tr>
+                        <td><strong>{{ risk.type }}</strong></td>
+                        <td>{{ risk.description }}</td>
+                        <td><span class="badge-custom bg-{{ risk.severity }}">{{ risk.severity|upper }}</span></td>
+                        <td>-{{ risk.impact }} points</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+
+        <!-- Top Objets -->
+        <div class="section">
+            <h2 class="section-title"><i class="bi bi-trophy"></i> Top Objets Détectés</h2>
+            
+            {% if ai_report.trends.top_objects %}
+            <table class="table-report">
+                <thead>
+                    <tr>
+                        <th>Rang</th>
+                        <th>Objet</th>
+                        <th>Détections</th>
+                        <th>Pourcentage</th>
+                        <th>Confiance Moy.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for obj in ai_report.trends.top_objects %}
+                    <tr>
+                        <td><strong>#{{ forloop.counter }}</strong></td>
+                        <td>{{ obj.name|title }}</td>
+                        <td>{{ obj.count }}</td>
+                        <td>{{ obj.percentage|floatformat:1 }}%</td>
+                        <td>{{ obj.avg_confidence|floatformat:0 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+
+        <!-- Patterns Anormaux -->
+        {% if ai_report.patterns.detected_patterns %}
+        <div class="section">
+            <h2 class="section-title"><i class="bi bi-pattern"></i> Patterns Anormaux Détectés</h2>
+            
+            <table class="table-report">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Sévérité</th>
+                        <th>Recommandation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pattern in ai_report.patterns.detected_patterns %}
+                    <tr>
+                        <td><strong>{{ pattern.type }}</strong></td>
+                        <td>{{ pattern.description }}</td>
+                        <td><span class="badge-custom bg-{{ pattern.severity }}">{{ pattern.severity|upper }}</span></td>
+                        <td>{{ pattern.recommendation }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="alert alert-warning mt-3">
+                <strong>Score d'Anomalie:</strong> {{ ai_report.patterns.anomaly_score|floatformat:1 }}/100
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Prédictions -->
+        {% if ai_report.predictions.available %}
+        <div class="section">
+            <h2 class="section-title"><i class="bi bi-crystal-ball"></i> Prédictions Machine Learning</h2>
+            
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-label">DÉTECTIONS PRÉVUES (7J)</div>
+                    <div class="stat-value">{{ ai_report.predictions.next_week_detections }}</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-label">MOYENNE QUOTIDIENNE</div>
+                    <div class="stat-value">{{ ai_report.predictions.avg_daily_detections }}</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-label">CONFIANCE PRÉDICTION</div>
+                    <div class="stat-value">{{ ai_report.predictions.confidence }}%</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-label">TENDANCE</div>
+                    <div class="stat-value">
+                        {% if ai_report.predictions.trend_direction == 'increasing' %}
+                            <i class="bi bi-arrow-up"></i>
+                        {% elif ai_report.predictions.trend_direction == 'decreasing' %}
+                            <i class="bi bi-arrow-down"></i>
+                        {% else %}
+                            <i class="bi bi-arrow-right"></i>
+                        {% endif %}
+                    </div>
+                    <small>{{ ai_report.predictions.trend_direction|title }}</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recommandations -->
+        {% if ai_report.recommendations %}
+        <div class="section">
+            <h2 class="section-title"><i class="bi bi-lightbulb"></i> Recommandations AI</h2>
+            
+            {% for rec in ai_report.recommendations %}
+            <div class="card mb-3 border-{{ rec.priority }}">
+                <div class="card-header bg-{{ rec.priority }} text-white">
+                    <strong>
+                        {% if rec.priority == 'high' %}<i class="bi bi-exclamation-triangle-fill"></i>{% endif %}
+                        {% if rec.priority == 'medium' %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+                        {% if rec.priority == 'low' %}<i class="bi bi-lightbulb-fill"></i>{% endif %}
+                        {{ rec.title }}
+                    </strong>
+                    <span class="badge bg-white text-dark float-end">{{ rec.priority|upper }}</span>
+                </div>
+                <div class="card-body">
+                    <p>{{ rec.description }}</p>
+                    <strong>Actions suggérées:</strong>
+                    <ul class="mt-2">
+                        {% for action in rec.actions %}
+                        <li>{{ action }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="report-footer text-center text-muted mt-5 pt-4" style="border-top: 2px solid #e5e7eb;">
+            <p>
+                <strong>Argus Security System</strong> - Système de Surveillance Intelligente avec IA
+                <br>
+                © {{ ai_report.generated_at|date:"Y" }} - Tous droits réservés
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

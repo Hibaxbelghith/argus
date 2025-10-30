@@ -45,8 +45,13 @@
             <div class="text-center mb-4">
                 {% if detection.annotated_image %}
                     <img src="{{ detection.annotated_image.url }}" alt="Detection" class="preview-img" style="max-height: 300px;">
-                {% else %}
+                {% elif detection.original_image %}
                     <img src="{{ detection.original_image.url }}" alt="Original" class="preview-img" style="max-height: 300px;">
+                {% else %}
+                    <div class="bg-light p-5 rounded">
+                        <i class="bi bi-image text-muted" style="font-size: 64px;"></i>
+                        <p class="text-muted mt-2">No image available</p>
+                    </div>
                 {% endif %}
             </div>
 

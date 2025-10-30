@@ -1,0 +1,264 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Argus Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background: #f8f9fa; }
+        .health-score { font-size: 3rem; font-weight: bold; }
+        .recommendation-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1rem;
+            border-left: 4px solid #dee2e6;
+        }
+        .recommendation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .recommendation-card.priority-5 { border-left-color: #dc3545; }
+        .recommendation-card.priority-4 { border-left-color: #fd7e14; }
+        .recommendation-card.priority-3 { border-left-color: #ffc107; }
+        .recommendation-card.priority-2 { border-left-color: #28a745; }
+        .recommendation-card.priority-1 { border-left-color: #6c757d; }
+        .stat-card { border-left: 4px solid; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .sidebar-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <i class="bi bi-shield-check"></i> Argus AI Analytics
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'analytics:dashboard' %}"><i class="bi bi-bar-chart"></i> Analytics</a>
+                <a class="nav-link active" href="{% url 'analytics:ai_dashboard_view' %}"><i class="bi bi-robot"></i> Dashboard IA</a>
+                <a class="nav-link" href="/detection/"><i class="bi bi-camera-video"></i> Détection</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1><i class="bi bi-robot"></i> {{ page_title }}</h1>
+                        <p class="text-muted">Analyse intelligente et recommandations personnalisées</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'analytics:ai_dashboard_view' %}?generate=true" class="btn btn-primary">
+                            <i class="bi bi-arrow-repeat"></i> Générer Nouvelles Recommandations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card stat-card bg-{{ health.color }} text-white" style="border-left-color: #fff;">
+                            <div class="card-body text-center">
+                                <h5>Score de Santé Global</h5>
+                                <div class="health-score">{{ health.score }}/100</div>
+                                <p class="mb-0">{{ health.label }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="card stat-card" style="border-left-color: #0d6efd;">
+                                    <div class="card-body text-center p-3">
+                                        <h3 class="mb-0 text-primary">{{ quick_stats.detections_week }}</h3>
+                                        <small class="text-muted">Détections (7j)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card stat-card" style="border-left-color: #ffc107;">
+                                    <div class="card-body text-center p-3">
+                                        <h3 class="mb-0 text-warning">{{ quick_stats.alerts_unread }}</h3>
+                                        <small class="text-muted">Alertes non lues</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card stat-card" style="border-left-color: #dc3545;">
+                                    <div class="card-body text-center p-3">
+                                        <h3 class="mb-0 text-danger">{{ quick_stats.alerts_critical }}</h3>
+                                        <small class="text-muted">Critiques</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card stat-card" style="border-left-color: #28a745;">
+                                    <div class="card-body text-center p-3">
+                                        <h3 class="mb-0 text-success">{{ quick_stats.recommendations_pending }}</h3>
+                                        <small class="text-muted">Recommandations</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0"><i class="bi bi-lightbulb-fill text-warning"></i> Recommandations IA</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if saved_recommendations %}
+                            {% for rec in saved_recommendations %}
+                            <div class="card recommendation-card priority-{{ rec.priority }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ rec.title }}</h5>
+                                    <div class="mb-2">
+                                        <span class="badge bg-secondary me-1">{{ rec.get_recommendation_type_display }}</span>
+                                        <span class="badge {% if rec.priority >= 4 %}bg-danger{% elif rec.priority == 3 %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            Priorité {{ rec.priority }}/5
+                                        </span>
+                                    </div>
+                                    <p class="text-muted">{{ rec.description }}</p>
+                                    <div class="alert alert-light border">
+                                        <strong>💡 Action:</strong> {{ rec.action }}
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Confiance: {{ rec.confidence|floatformat:0 }}%</small>
+                                        <div class="btn-group btn-group-sm">
+                                            <button onclick="markAsActed({{ rec.id }})" class="btn btn-success btn-sm">
+                                                <i class="bi bi-check-circle"></i> Traité
+                                            </button>
+                                            <button onclick="markAsDismissed({{ rec.id }})" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-x-circle"></i> Ignorer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                                <p class="mt-3">Aucune recommandation disponible.</p>
+                                <a href="{% url 'analytics:ai_dashboard_view' %}?generate=true" class="btn btn-primary">
+                                    Générer des recommandations
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="sidebar-card">
+                    <h5><i class="bi bi-bar-chart-fill"></i> Statistiques</h5>
+                    <div class="mb-2"><strong>Total:</strong> <span class="float-end">{{ rec_stats.total }}</span></div>
+                    <div class="mb-2"><strong>En attente:</strong> <span class="float-end">{{ rec_stats.pending }}</span></div>
+                    <div class="mb-2"><strong>Traitées:</strong> <span class="float-end">{{ rec_stats.acted }}</span></div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h5><i class="bi bi-lightbulb"></i> Insights Récents</h5>
+                    {% if recent_insights %}
+                        {% for insight in recent_insights %}
+                        <div class="mb-3 pb-2 border-bottom">
+                            <small class="text-muted">{{ insight.insight_type|capfirst }}</small>
+                            <p class="mb-1 small">{{ insight.message }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">Aucun insight disponible</p>
+                    {% endif %}
+                </div>
+
+                <div class="sidebar-card">
+                    <h5><i class="bi bi-bell-fill"></i> Alertes Récentes</h5>
+                    {% if recent_alerts %}
+                        {% for alert in recent_alerts %}
+                        <div class="mb-2 pb-2 border-bottom">
+                            <span class="badge bg-{{ alert.severity }} me-2">{{ alert.severity }}</span>
+                            <small>{{ alert.title }}</small><br>
+                            <small class="text-muted">{{ alert.created_at|timesince }} ago</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">Aucune alerte récente</p>
+                    {% endif %}
+                </div>
+
+                <div class="sidebar-card">
+                    <h5><i class="bi bi-trophy-fill text-warning"></i> Top Objets Détectés</h5>
+                    {% if top_trends %}
+                        {% for trend in top_trends %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{{ trend.object_type }}</span>
+                            <span class="badge bg-primary">{{ trend.detection_count }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">Aucune tendance disponible</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function markAsActed(recId) {
+        if (confirm('Marquer cette recommandation comme traitée ?')) {
+            fetch(`/analytics/api/ai/recommendations/${recId}/status/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({action: 'act'})
+            }).then(() => location.reload());
+        }
+    }
+
+    function markAsDismissed(recId) {
+        if (confirm('Ignorer cette recommandation ?')) {
+            fetch(`/analytics/api/ai/recommendations/${recId}/status/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({action: 'dismiss'})
+            }).then(() => location.reload());
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

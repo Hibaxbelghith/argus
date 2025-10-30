@@ -195,11 +195,15 @@
                     {% for detection in recent_detections %}
                     <div class="col-md-4 mb-3">
                         <div class="card detection-card">
-                            <a href="{% url 'detection:result' detection.pk %}">
+                            <a href="{% url 'detection:result' detection.id %}">
                                 {% if detection.annotated_image %}
                                     <img src="{{ detection.annotated_image.url }}" class="card-img-top" alt="Detection">
-                                {% else %}
+                                {% elif detection.original_image %}
                                     <img src="{{ detection.original_image.url }}" class="card-img-top" alt="Original">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <i class="bi bi-image text-muted" style="font-size: 64px;"></i>
+                                    </div>
                                 {% endif %}
                             </a>
                             <div class="card-body">
