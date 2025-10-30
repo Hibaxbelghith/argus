@@ -7,14 +7,11 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     # photo de référence pour la reconnaissance faciale
     photo = models.ImageField(upload_to='faces/', blank=True, null=True)
-<<<<<<< HEAD
     # Numéro de téléphone pour les notifications SMS
     phone_number = models.CharField(max_length=20, blank=True, null=True, help_text="Format: +33612345678")
-=======
     ROLE_CHOICES = (('admin', 'Admin'), ('user', 'User'))
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
 
->>>>>>> origin/feature-auth
     
 
     def __str__(self):
