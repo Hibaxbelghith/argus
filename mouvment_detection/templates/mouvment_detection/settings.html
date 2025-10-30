@@ -1,0 +1,106 @@
+{% extends 'mouvment_detection/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-bottom: 1.5rem; color: #667eea;">⚙️ Paramètres de Détection</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Nom de la Configuration</label>
+            <input type="text" name="name" value="{% if settings %}{{ settings.name }}{% else %}Default{% endif %}"
+                style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Index de la Caméra</label>
+            <input type="number" name="camera_index"
+                value="{% if settings %}{{ settings.camera_index }}{% else %}0{% endif %}" min="0" max="10"
+                style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+            <small style="color: #666;">0 = caméra par défaut, 1 = deuxième caméra, etc.</small>
+        </div>
+
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" name="enable_motion" {% if not settings or settings.enable_motion_detection
+                    %}checked{% endif %}>
+                <span style="font-weight: 600;">Activer la détection de mouvement</span>
+            </label>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" name="enable_face" {% if not settings or settings.enable_face_detection
+                    %}checked{% endif %}>
+                <span style="font-weight: 600;">Activer la détection de visages</span>
+            </label>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Seuil de Mouvement</label>
+            <input type="range" name="motion_threshold"
+                value="{% if settings %}{{ settings.motion_threshold }}{% else %}25{% endif %}" min="5" max="50"
+                step="5" id="motionThreshold" style="width: 100%;">
+            <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.875rem;">
+                <span>Sensible (5)</span>
+                <span id="thresholdValue">{% if settings %}{{ settings.motion_threshold }}{% else %}25{% endif %}</span>
+                <span>Moins sensible (50)</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Surface Minimale du Contour</label>
+            <input type="number" name="min_contour_area"
+                value="{% if settings %}{{ settings.min_contour_area }}{% else %}500{% endif %}" min="100" max="5000"
+                step="100" style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+            <small style="color: #666;">Ignorer les mouvements plus petits que cette valeur (en pixels)</small>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" name="save_images" {% if not settings or settings.save_images %}checked{% endif
+                    %}>
+                <span style="font-weight: 600;">Sauvegarder les images lors des détections</span>
+            </label>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Intervalle de Détection
+                (secondes)</label>
+            <input type="number" name="detection_interval"
+                value="{% if settings %}{{ settings.detection_interval }}{% else %}1{% endif %}" min="1" max="60"
+                style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+            <small style="color: #666;">Temps minimum entre deux enregistrements de détection</small>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-success">💾 Sauvegarder</button>
+            <a href="{% url 'detection:index' %}" class="btn btn-primary">↩️ Retour</a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 1rem; color: #667eea;">ℹ️ Informations</h3>
+    <ul style="line-height: 2; color: #666;">
+        <li><strong>Détection de mouvement :</strong> Utilise la différence entre les frames pour détecter les
+            mouvements</li>
+        <li><strong>Détection de visages :</strong> Utilise Haar Cascade (inclus avec OpenCV, 100% gratuit et local)
+        </li>
+        <li><strong>Seuil de mouvement :</strong> Plus la valeur est faible, plus la détection est sensible</li>
+        <li><strong>Surface minimale :</strong> Permet d'ignorer les petits mouvements (bruit, ombres)</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const slider = document.getElementById('motionThreshold');
+    const output = document.getElementById('thresholdValue');
+
+    slider.addEventListener('input', function () {
+        output.textContent = this.value;
+    });
+</script>
+{% endblock %}
