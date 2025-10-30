@@ -29,3 +29,5 @@ __pycache__/
 # Dossiers Django spécifiques
 /static/
  /media/
+ media/detections/
+!media/detections/.gitkeep
