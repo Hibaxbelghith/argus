@@ -1,3 +1,7 @@
+# CSRF trusted origins for ngrok
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app',
+]
 """
 Django settings for argus project.
 
