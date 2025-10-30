@@ -10,6 +10,7 @@ opencv-python
 Pillow
 yolov5
 flask
+spacy
 
 # IA & Machine Learning pour Analytics
 scikit-learn>=1.3.0
