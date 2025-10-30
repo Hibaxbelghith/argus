@@ -21,8 +21,8 @@ from django.contrib import admin
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # ✅ ajoute cette ligne si elle n’existe pas
-    path('auth/', include('authentication.urls')),  # ton app d’authentification
+    path('admin/', admin.site.urls), 
+    path('auth/', include('authentication.urls')), 
 ]
 
 if settings.DEBUG:

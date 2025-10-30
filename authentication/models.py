@@ -7,6 +7,9 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     # photo de référence pour la reconnaissance faciale
     photo = models.ImageField(upload_to='faces/', blank=True, null=True)
+    ROLE_CHOICES = (('admin', 'Admin'), ('user', 'User'))
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
+
     
 
     def __str__(self):
@@ -17,8 +20,23 @@ class LoginAttempt(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     success = models.BooleanField(default=False)
     ip_address = models.GenericIPAddressField(blank=True, null=True)
-    method = models.CharField(max_length=20, choices=(('password', 'password'), ('face', 'face')), default='password')
+    method = models.CharField(max_length=20, choices=(
+        ('password', 'password'),
+        ('face', 'face'),
+        ('ai', 'ai')
+    ), default='password')
+    country = models.CharField(max_length=100, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
     note = models.TextField(blank=True, null=True)
+    anomaly_score = models.FloatField(default=0.0)
 
     def __str__(self):
-        return f"{self.user} - {'OK' if self.success else 'FAIL'} at {self.timestamp}"
+        return f"{self.user} - {'OK' if self.success else 'FAIL'} ({self.method})"
+
+    class Meta:
+        ordering = ['-timestamp']
+
+
+class Meta:
+    indexes = [models.Index(fields=['timestamp', 'ip_address'])]
+

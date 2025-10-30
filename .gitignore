@@ -25,3 +25,6 @@ __pycache__/
 # Dossiers Django spécifiques
 /static/
  /media/
+
+#images temporaires pour la reconnaissance faciale
+MEDIA_ROOT/temp_faces
