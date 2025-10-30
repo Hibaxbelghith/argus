@@ -279,25 +279,31 @@ class SecurityCamera:
             is_file = isinstance(self.camera_source, str) and (
                 self.camera_source.endswith(('.mp4', '.avi', '.mov', '.mkv', '.webm'))
             )
-            
+
+            print(f"[DEBUG] Attempting to connect to camera source: {self.camera_source} (type: {'file' if is_file else 'camera'})")
             self.camera = cv2.VideoCapture(self.camera_source)
-            
+
             # Set camera properties (only for live cameras, not files)
             if not is_file:
                 self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
                 self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
                 self.camera.set(cv2.CAP_PROP_FPS, 30)
-            
+
             if not self.camera.isOpened():
-                print(f"Failed to open source: {self.camera_source}")
+                print(f"[ERROR] Failed to open camera source: {self.camera_source}")
+                # Additional diagnostics
+                if isinstance(self.camera_source, int):
+                    print("[HINT] If using a webcam, ensure it is connected and not used by another application.")
+                elif isinstance(self.camera_source, str):
+                    print("[HINT] If using an IP camera, check the URL, network, and credentials.")
                 return False
-            
+
             source_type = "video file" if is_file else "camera"
-            print(f"Connected to {source_type}: {self.camera_source}")
+            print(f"[INFO] Connected to {source_type}: {self.camera_source}")
             return True
-            
+
         except Exception as e:
-            print(f"Error connecting to camera: {str(e)}")
+            print(f"[EXCEPTION] Error connecting to camera: {str(e)}")
             return False
     
     def disconnect_camera(self):
