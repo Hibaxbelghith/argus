@@ -1,5 +1,3 @@
-def demo(request):
-	return render(request, 'voicecontrol/demo.html')
 
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -12,6 +10,9 @@ import os
 from django.conf import settings
 from django.core.files.storage import default_storage
 from .models import VoiceCommand
+
+def demo(request):
+	return render(request, 'voicecontrol/demo.html')
 
 
 
