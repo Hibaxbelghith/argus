@@ -49,6 +49,7 @@ Start it with: `python emotion_launcher.py`
 2. Create & activate virtual env (Python 3.11):
    `python -m venv venv && .\venv\Scripts\Activate`
 3. `pip install -r requirements.txt`
+4. `python -m spacy download en_core_web_md`
 4. `python manage.py migrate`
 5. `python manage.py runserver`
    Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
