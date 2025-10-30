@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARGUS - Edit Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background effects */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    body::before {
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #0066ff, transparent);
+      top: 20%;
+      left: 0;
+      animation: scan 8s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
+    }
+
+    body::after {
+      width: 500px;
+      height: 500px;
+      border: 2px solid #0066ff;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: radar 10s linear infinite;
+    }
+
+    @keyframes scan {
+      0%, 100% { top: 10%; opacity: 0; }
+      50% { top: 80%; opacity: 0.12; }
+    }
+
+    @keyframes radar {
+      0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0.15; }
+      50% { opacity: 0.08; }
+      100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+    }
+
+    /* Container */
+    .profile-container {
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Card */
+    .profile-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    /* Header */
+    .profile-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .logo-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #0066ff, #0099ff);
+      border-radius: 14px;
+      margin-bottom: 16px;
+      font-size: 28px;
+    }
+
+    .profile-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    .profile-header p {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    /* Alert */
+    .alert-custom {
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 24px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1.5px solid rgba(16, 185, 129, 0.3);
+      color: #059669;
+    }
+
+    .alert-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1.5px solid rgba(239, 68, 68, 0.3);
+      color: #dc2626;
+    }
+
+    .alert-info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1.5px solid rgba(59, 130, 246, 0.3);
+      color: #2563eb;
+    }
+
+    /* Photo Upload Section */
+    .photo-section {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .photo-label {
+      display: block;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .photo-upload-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .photo-preview {
+      width: 160px;
+      height: 160px;
+      border: 3px dashed #d1d5db;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .photo-preview:hover {
+      border-color: #0066ff;
+      background: rgba(0, 102, 255, 0.02);
+      transform: scale(1.02);
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: #9ca3af;
+    }
+
+    .photo-placeholder-icon {
+      font-size: 48px;
+    }
+
+    .photo-placeholder-text {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .photo-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: 50%;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .photo-preview:hover .photo-overlay {
+      opacity: 1;
+    }
+
+    .photo-hint {
+      color: #6b7280;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      color: #1a1a1a;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus {
+      background: #ffffff;
+      border-color: #0066ff;
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    input::placeholder {
+      color: #9ca3af;
+    }
+
+    /* Buttons */
+    .btn-primary-custom {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #0066ff, #0099ff);
+      border: none;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+
+    .btn-primary-custom:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+    }
+
+    /* Secondary Actions */
+    .secondary-actions {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary-custom {
+      flex: 1;
+      min-width: 180px;
+      padding: 11px 20px;
+      background: #ffffff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-secondary-custom:hover {
+      background: #f9fafb;
+      border-color: #0066ff;
+      color: #0066ff;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger-custom {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #dc2626;
+    }
+
+    .btn-danger-custom:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #dc2626;
+      color: #dc2626;
+    }
+
+    /* Back Link */
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      color: #6b7280;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .back-link a:hover {
+      color: #0066ff;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(59, 130, 246, 0.05);
+      border: 1.5px solid rgba(59, 130, 246, 0.15);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .info-box-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .info-box-text {
+      color: #374151;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .profile-card {
+        padding: 28px 24px;
+      }
+
+      .photo-preview {
+        width: 140px;
+        height: 140px;
+      }
+
+      .secondary-actions {
+        flex-direction: column;
+      }
+
+      .btn-secondary-custom {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <div class="profile-card">
+      <!-- Header -->
+      <div class="profile-header">
+        <div class="logo-wrapper">👁️</div>
+        <h1>Edit Profile</h1>
+        <p>Update your account information and security settings</p>
+      </div>
+
+      <!-- Alerts -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert-custom alert-{{ message.tags }}">
+            <span>
+              {% if message.tags == 'success' %}✅
+              {% elif message.tags == 'danger' %}❌
+              {% else %}ℹ️{% endif %}
+            </span>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <div class="info-box-title">
+          <span>🔐</span>
+          <span>Facial Recognition</span>
+        </div>
+        <div class="info-box-text">
+          Your profile photo is used for secure facial recognition login. Make sure it's a clear, front-facing photo in good lighting.
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Photo Upload -->
+        <div class="photo-section">
+          <label class="photo-label">Profile Photo</label>
+          <div class="photo-upload-wrapper">
+            <div class="photo-preview" id="photoPreview" onclick="document.getElementById('id_photo').click()">
+              {% if form.instance.photo %}
+                <img src="{{ form.instance.photo.url }}" alt="Profile" id="previewImage">
+                <div class="photo-overlay">📷 Change Photo</div>
+              {% else %}
+                <div class="photo-placeholder">
+                  <div class="photo-placeholder-icon">📷</div>
+                  <div class="photo-placeholder-text">Click to upload</div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="photo-hint">Supported formats: JPG, PNG • Max size: 5MB</div>
+          {{ form.photo }}
+        </div>
+
+        <!-- Username -->
+        <div class="form-group">
+          <label for="id_username">Username</label>
+          {{ form.username }}
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="id_email">Email Address</label>
+          {{ form.email }}
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary-custom">💾 Save Changes</button>
+      </form>
+
+      <!-- Secondary Actions -->
+      <div class="secondary-actions">
+        <a href="{% url 'change_password' %}" class="btn-secondary-custom">
+          🔑 Change Password
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn-secondary-custom">
+          ← Back to Dashboard
+        </a>
+      </div>
+
+      <!-- Back Link -->
+      <div class="back-link">
+        <a href="{% url 'logout' %}">🚪 Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Photo preview functionality
+    const photoInput = document.getElementById('id_photo');
+    const photoPreview = document.getElementById('photoPreview');
+
+    if (photoInput) {
+      photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        
+        if (file) {
+          // Validate file type
+          const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+          if (!validTypes.includes(file.type)) {
+            alert('❌ Please upload a JPG or PNG image');
+            photoInput.value = '';
+            return;
+          }
+
+          // Validate file size (5MB)
+          const maxSize = 5 * 1024 * 1024;
+          if (file.size > maxSize) {
+            alert('❌ File size must be less than 5MB');
+            photoInput.value = '';
+            return;
+          }
+
+          // Show preview
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            photoPreview.innerHTML = `
+              <img src="${ev.target.result}" alt="Preview" id="previewImage">
+              <div class="photo-overlay">📷 Change Photo</div>
+            `;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // Add form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+      const username = document.getElementById('id_username').value.trim();
+      const email = document.getElementById('id_email').value.trim();
+
+      if (!username) {
+        e.preventDefault();
+        alert('❌ Username is required');
+        return;
+      }
+
+      if (!email) {
+        e.preventDefault();
+        alert('❌ Email is required');
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        e.preventDefault();
+        alert('❌ Please enter a valid email address');
+        return;
+      }
+    });
+  </script>
+</body>
+</html>
