@@ -37,3 +37,39 @@ class ImageUploadForm(forms.ModelForm):
                 )
         
         return image
+
+
+class DetectionEditForm(forms.ModelForm):
+    """Form for editing detection metadata"""
+    
+    class Meta:
+        model = DetectionResult
+        fields = ['title', 'description', 'tags', 'location']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Front Entrance Security Check'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Add notes, observations, or context about this detection...'
+            }),
+            'tags': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., security, entrance, daytime, suspicious'
+            }),
+            'location': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Building A - Main Entrance'
+            }),
+        }
+        labels = {
+            'title': 'Title',
+            'description': 'Description / Notes',
+            'tags': 'Tags',
+            'location': 'Location'
+        }
+        help_texts = {
+            'tags': 'Separate tags with commas (e.g., security, entrance, night)',
+        }

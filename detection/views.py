@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import StreamingHttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
 from .models import DetectionResult
-from .forms import ImageUploadForm
+from .forms import ImageUploadForm, DetectionEditForm
 from .object_detector import get_detector, get_security_camera
 import os
 from pathlib import Path
@@ -163,6 +163,29 @@ def delete_detection(request, pk):
         return redirect('detection:history')
     
     return render(request, 'detection/delete_confirm.html', {'detection': detection})
+
+
+@login_required
+def edit_detection(request, pk):
+    """
+    Edit detection metadata (title, description, tags, location)
+    """
+    detection = get_object_or_404(DetectionResult, pk=pk, user=request.user)
+    
+    if request.method == 'POST':
+        form = DetectionEditForm(request.POST, instance=detection)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Detection updated successfully!")
+            return redirect('detection:result', pk=pk)
+    else:
+        form = DetectionEditForm(instance=detection)
+    
+    context = {
+        'form': form,
+        'detection': detection,
+    }
+    return render(request, 'detection/edit.html', context)
 
 
 # ==================== REAL-TIME SECURITY MONITORING VIEWS ====================

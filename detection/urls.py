@@ -9,6 +9,7 @@ urlpatterns = [
     path('process/<int:pk>/', views.process_detection, name='process'),
     path('result/<int:pk>/', views.detection_result, name='result'),
     path('history/', views.detection_history, name='history'),
+    path('edit/<int:pk>/', views.edit_detection, name='edit'),
     path('delete/<int:pk>/', views.delete_detection, name='delete'),
     
     # Real-time security monitoring endpoints
