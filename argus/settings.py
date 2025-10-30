@@ -1,6 +1,7 @@
 # CSRF trusted origins for ngrok
 CSRF_TRUSTED_ORIGINS = [
     'https://*.ngrok-free.app',
+    'https://*.ngrok-free.dev',
 ]
 """
 Django settings for argus project.
@@ -33,6 +34,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.ngrok-free.app',
+    '.ngrok-free.dev',
 ]
 
 
