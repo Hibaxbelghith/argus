@@ -127,6 +127,9 @@
                                         <a href="{% url 'detection:result' detection.pk %}" class="btn btn-sm btn-primary">
                                             <i class="bi bi-eye"></i> View Details
                                         </a>
+                                        <a href="{% url 'detection:edit' detection.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
                                         <a href="{% url 'detection:delete' detection.pk %}" class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-trash"></i> Delete
                                         </a>
