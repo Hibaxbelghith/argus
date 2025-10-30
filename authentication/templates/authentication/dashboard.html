@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="fr">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tableau de bord - Argus Security</title>
+  <title>Dashboard - Argus Security</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <style>
@@ -296,129 +296,124 @@
             <i class="bi bi-person-circle"></i> My Profile
           </a>
           <a href="{% url 'logout' %}" class="btn btn-light btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Déconnexion
+            <i class="bi bi-box-arrow-right"></i> Logout
           </a>
         </div>
       </div>
     </nav>
   </div>
 
-    <!-- Contenu principal -->
+    <!-- Main Content -->
     <div class="container dashboard-container">
       <div class="welcome-section">
-        <h2>Bienvenue, {{ request.user.username }} 👋</h2>
+        <h2>Welcome Back, {{ request.user.username }} 👋</h2>
         <p>
-          Heureux de vous revoir ! Voici votre espace de gestion et de sécurité.
+          Great to see you again! Here's your security management center.
         </p>
       </div>
 
       <div class="row g-4">
-        <!-- Bloc 1 -->
+        <!-- Blockk 1 -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">📷 Caméra</h5>
+            <h5 class="card-title">📷 Camera</h5>
             <p>
-              Visualisez le flux en direct et configurez la surveillance
-              intelligente.
+              View live streams and configure intelligent surveillance.
             </p>
-            <a href="#" class="btn btn-outline-primary">Ouvrir</a>
+            <a href="#" class="btn btn-outline-primary">Open</a>
           </div>
         </div>
 
-        <!-- Bloc 2 -->
+        <!-- Block 2 -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">🤖 Détection IA</h5>
+            <h5 class="card-title">🤖 AI Detection</h5>
             <p>Activez l’analyse automatique et la reconnaissance faciale.</p>
-            <a href="#" class="btn btn-outline-primary">Configurer</a>
+            <a href="#" class="btn btn-outline-primary">Configure</a>
           </div>
         </div>
 
-        <!-- Bloc 3 -->
+        <!-- Block 3 -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">⚠️ Alertes</h5>
+            <h5 class="card-title">⚠️ Alerts</h5>
             <p>
-              Consultez les alertes générées et l’historique des événements.
+              View generated alerts and event history.
             </p>
-            <a href="#" class="btn btn-outline-primary">Voir</a>
+            <a href="#" class="btn btn-outline-primary">View</a>
           </div>
         </div>
 
-        <!-- Bloc 4 : Voice Control -->
+        <!-- Block 4 : Voice Control -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">🎤 Commandes vocales</h5>
+            <h5 class="card-title">🎤 Voice Commands</h5>
             <p>
-              Testez et gérez les commandes vocales pour contrôler la sécurité
-              et l’accès.
+              Test and manage Voice Commands to control security
+              and access.
             </p>
             {% if request.user.is_staff %}
             <a
               href="/admin/voicecontrol/voicecommand/"
               class="btn btn-outline-primary"
-              >Gérer les commandes (CRUD)</a
+              >Manage Commands (CRUD)</a
             >
             {% else %}
             <a href="{% url 'voice_demo' %}" class="btn btn-outline-primary"
-              >Accéder au module</a
+              >Access Module</a
             >
             {% endif %}
           </div>
         </div>
 
-        <!-- Bloc 5 -->
+        <!-- Block 5 -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">🎯 Détection objets</h5>
+            <h5 class="card-title">🎯 Object Detection</h5>
             <p>
-              Analyse en temps réel du flux vidéo pour détecter personnes et
-              objets automatiquement.
+              Real-time video analysis to automatically detect people and objects.
             </p>
-            <a href="/detection/" class="btn btn-outline-primary">Ouvrir</a>
+            <a href="/detection/" class="btn btn-outline-primary">Open</a>
           </div>
         </div>
 
-        <!-- Bloc 6 : Live Emotion Detection -->
+        <!-- Block 6 : Live Emotion Detection -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">😊 Détection d'émotions</h5>
+            <h5 class="card-title">😊 Emotion Detection</h5>
             <p>
-              Détectez les émotions en temps réel via votre webcam avec
-              affichage des résultats en direct.
+              Detect emotions in real-time via your webcam with live results display.
             </p>
             <a href="/emotion/live/" class="btn btn-outline-primary"
-              >Lancer le module</a
+              >Launch Module</a
             >
           </div>
         </div>
 
-        <!-- Bloc 7 : Mouvement Detection -->
+        <!-- Block 7 : Mouvement Detection -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">🚶 Détection de Mouvement</h5>
+            <h5 class="card-title">🚶 Motion Detection</h5>
             <p>
-              Détection intelligente de mouvement avec capture d'images et
-              historique des événements.
+              Intelligent motion detection with image capture and event history.
             </p>
             <div class="d-flex gap-2">
               <a href="/mouvment/" class="btn btn-outline-primary btn-sm"
-                >Flux en Direct</a
+                >Live Stream</a
               >
               <a href="/mouvment/events/" class="btn btn-outline-success btn-sm"
-                >Historique</a
+                >History</a
               >
             </div>
           </div>
         </div>
 
-        <!-- Bloc 8 : Analytics AI -->
+        <!-- Block 8 : AI Analytics -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">🤖 Analytics AI</h5>
+            <h5 class="card-title">🤖 AI Analytics</h5>
             <p>
-              Analyses intelligentes avec prédictions ML, scoring de sécurité et
-              recommandations IA.
+              Intelligent analytics with ML predictions, security scoring and AI recommendations.
             </p>
             <div class="d-flex gap-2">
               <a
@@ -429,72 +424,71 @@
               <a
                 href="{% url 'analytics:ai_report' %}"
                 class="btn btn-outline-success btn-sm"
-                >Rapport IA</a
+                >AI Report</a
               >
             </div>
           </div>
         </div>
 
-        <!-- Bloc 9 : Notifications -->
+        <!-- Block 9 : Notifications -->
         <div class="col-md-4">
           <div class="card p-3">
             <h5 class="card-title">🔔 Notifications</h5>
             <p>
-              Gérez vos notifications, alertes prédictives et préférences de
-              communication.
+              Manage your notifications, predictive alerts and communication
+              preferences.
             </p>
             <a
               href="{% url 'notifications:dashboard' %}"
               class="btn btn-outline-primary"
-              >Centre de notifications</a
+              >Notification Center</a
             >
           </div>
         </div>
 
-        <!-- Bloc 10 : Historique Détections -->
+        <!-- Block 10 : Detection History -->
         <div class="col-md-4">
           <div class="card p-3">
-            <h5 class="card-title">📜 Historique</h5>
+            <h5 class="card-title">📜 History</h5>
             <p>
-              Consultez l'historique complet de toutes vos détections et
-              analyses.
+              View complete history of all your detections and analyses.
             </p>
             <a
               href="{% url 'detection:history' %}"
               class="btn btn-outline-primary"
-              >Voir l'historique</a
+              >View History</a
             >
           </div>
         </div>
       </div>
 
-      <!-- Section des statistiques rapides -->
+      <!-- Quick Statistics Section -->
       <div class="row g-4 mt-4">
         <div class="col-12">
-          <h4 class="text-center mb-3">📈 Statistiques en Temps Réel</h4>
+          <h4 class="text-center mb-3">📈 Real-Time Statistics</h4>
         </div>
 
         <div class="col-md-3">
           <div class="card p-3 text-center bg-primary text-white">
-            <h6>Total Détections</h6>
+            <h6>Total Detections</h6>
             <h2 id="total-detections">--</h2>
-            <small>Depuis le début</small>
+            <small>Since beginning</small>
           </div>
         </div>
 
         <div class="col-md-3">
           <div class="card p-3 text-center bg-success text-white">
-            <h6>Objets Détectés</h6>
+            <h6>Detected Objects</h6>
             <h2 id="total-objects">--</h2>
-            <small>Aujourd'hui</small>
+            <small>Today</small>
           </div>
         </div>
 
         <div class="col-md-3">
           <div class="card p-3 text-center bg-warning text-white">
-            <h6>Alertes Actives</h6>
+            <h6>Alerts Actives</h6>
             <h2 id="active-alerts">--</h2>
-            <small>Non résolues</small>
+            <small>Unresolved</small>
           </div>
         </div>
 
@@ -502,15 +496,15 @@
           <div class="card p-3 text-center bg-info text-white">
             <h6>Notifications</h6>
             <h2 id="unread-notifications">--</h2>
-            <small>Non lues</small>
+            <small>Unread</small>
           </div>
         </div>
       </div>
 
-      <!-- Section AI Insights -->
+      <!-- AI Insights Section -->
       <div class="row g-4 mt-4">
         <div class="col-12">
-          <h4 class="text-center mb-3">🤖 Insights IA du Jour</h4>
+          <h4 class="text-center mb-3">🤖 AI Insights of the Day</h4>
         </div>
 
         <div class="col-md-4">
@@ -532,10 +526,10 @@
                 </div>
               </div>
               <div>
-                <h6 class="mb-1">Score de Sécurité</h6>
-                <p class="text-muted mb-0 small">Analyse AI de votre système</p>
+                <h6 class="mb-1">Security Score</h6>
+                <p class="text-muted mb-0 small">AI Analysis of your system</p>
                 <span class="badge bg-success" id="security-level"
-                  >Chargement...</span
+                  >Loading...</span
                 >
               </div>
             </div>
@@ -552,10 +546,10 @@
                 ></i>
               </div>
               <div>
-                <h6 class="mb-1">Tendance du Jour</h6>
+                <h6 class="mb-1">Daily Trend</h6>
                 <p class="mb-0"><strong id="trend-direction">--</strong></p>
                 <small class="text-muted" id="trend-details"
-                  >Analyse en cours...</small
+                  >Analysis in progress...</small
                 >
               </div>
             </div>
@@ -572,28 +566,28 @@
                 ></i>
               </div>
               <div>
-                <h6 class="mb-1">Objets Suspects</h6>
+                <h6 class="mb-1">Suspicious Objects</h6>
                 <h4 class="mb-0" id="suspicious-count">--</h4>
-                <small class="text-muted">Confiance < 50%</small>
+                <small class="text-muted">Confidence < 50%</small>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Section Top Objets -->
+      <!-- Top Objects Section -->
       <div class="row g-4 mt-4">
         <div class="col-md-6">
           <div class="card p-3">
             <h5 class="card-title mb-3">
-              🎯 Top 5 Objets Détectés Aujourd'hui
+              🎯 Top 5 Detected Objects Today
             </h5>
             <div id="top-objects-list">
               <div class="text-center text-muted">
                 <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Chargement...</span>
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-2">Chargement des données...</p>
+                <p class="mt-2">Loading data...</p>
               </div>
             </div>
           </div>
@@ -601,13 +595,13 @@
 
         <div class="col-md-6">
           <div class="card p-3">
-            <h5 class="card-title mb-3">💡 Recommandation IA</h5>
+            <h5 class="card-title mb-3">💡 AI Recommendation</h5>
             <div id="ai-recommendation">
               <div class="text-center text-muted">
                 <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Chargement...</span>
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-2">Analyse en cours...</p>
+                <p class="mt-2">Analysis in progress...</p>
               </div>
             </div>
           </div>
@@ -616,18 +610,18 @@
     </div>
 
     <script>
-      // Charger les statistiques au chargement de la page
+      // Load statistics on page load
       document.addEventListener("DOMContentLoaded", function () {
         loadStats();
         loadAIInsights();
-        // Rafraîchir toutes les 30 secondes
+        // Refresh every 30 seconds
         setInterval(loadStats, 30000);
-        setInterval(loadAIInsights, 60000); // AI insights toutes les 60 secondes
+        setInterval(loadAIInsights, 60000); // AI insights every 60 seconds
       });
 
       async function loadStats() {
         try {
-          // Statistiques Analytics
+          // Analytics Statistics
           const analyticsResponse = await fetch(
             "/analytics/api/stats/summary/"
           );
@@ -641,7 +635,7 @@
               analyticsData.data.alerts.unread || 0;
           }
 
-          // Statistiques Notifications
+          // Notifications Statistics
           const notifResponse = await fetch("/notifications/api/stats/");
           if (notifResponse.ok) {
             const notifData = await notifResponse.json();
@@ -649,8 +643,8 @@
               notifData.data.unread_count || 0;
           }
         } catch (error) {
-          console.log("Erreur lors du chargement des statistiques:", error);
-          // Afficher 0 en cas d'erreur
+          console.log("Error loading statistics:", error);
+          // Display 0 in case of error
           document.getElementById("total-detections").textContent = "0";
           document.getElementById("total-objects").textContent = "0";
           document.getElementById("active-alerts").textContent = "0";
@@ -660,7 +654,7 @@
 
       async function loadAIInsights() {
         try {
-          // Utiliser le nouvel endpoint optimisé pour les insights rapides
+          // Use the optimized endpoint for quick insights
           const response = await fetch(
             "/analytics/api/quick-insights/?period=day"
           );
@@ -670,7 +664,7 @@
             if (result.success) {
               const insights = result.data;
 
-              // Score de sécurité
+              // Security score
               const securityScore = insights.security.score || 0;
               const securityLevel = insights.security.level || "unknown";
               document.getElementById("security-score").textContent =
@@ -679,7 +673,7 @@
               const levelBadge = document.getElementById("security-level");
               levelBadge.textContent = securityLevel.toUpperCase();
 
-              // Couleur du badge selon le niveau
+              // Badge color according to level
               levelBadge.className = "badge ";
               if (securityLevel === "excellent")
                 levelBadge.className += "bg-success";
@@ -689,29 +683,29 @@
                 levelBadge.className += "bg-warning";
               else levelBadge.className += "bg-danger";
 
-              // Tendance
+              // Trend
               const trend = insights.summary.trend || "stable";
               const changePercent = insights.summary.change_percent || 0;
               document.getElementById("trend-direction").textContent =
                 trend === "increasing"
-                  ? "📈 En hausse"
+                  ? "📈 Increasing"
                   : trend === "decreasing"
-                  ? "📉 En baisse"
+                  ? "📉 Decreasing"
                   : "➡️ Stable";
               document.getElementById("trend-details").textContent = `${
                 changePercent > 0 ? "+" : ""
-              }${changePercent.toFixed(1)}% vs hier`;
+              }${changePercent.toFixed(1)}% vs yesterday`;
 
-              // Objets suspects
+              // Suspicious objects
               document.getElementById("suspicious-count").textContent =
                 insights.summary.suspicious_count || 0;
 
-              // Top objets
+              // Top objects
               const topObjects = insights.top_objects || [];
               let topObjectsHtml = "";
               if (topObjects.length === 0) {
                 topObjectsHtml =
-                  '<p class="text-muted">Aucune détection aujourd\'hui</p>';
+                  '<p class="text-muted">No detections today</p>';
               } else {
                 topObjects.forEach((obj, index) => {
                   topObjectsHtml += `
@@ -735,12 +729,12 @@
               document.getElementById("top-objects-list").innerHTML =
                 topObjectsHtml;
 
-              // Recommandation IA
+              // AI Recommendation
               const topRec = insights.top_recommendation;
               let recHtml = "";
               if (!topRec) {
                 recHtml =
-                  '<p class="text-muted">Aucune recommandation pour le moment</p>';
+                  '<p class="text-muted">No recommendations at the moment</p>';
               } else {
                 const priorityColor =
                   topRec.priority === "high"
@@ -762,7 +756,7 @@
                   </ul>
                   <div class="mt-2">
                     <a href="/analytics/ai-report/" class="btn btn-sm btn-outline-${priorityColor}">
-                      Voir toutes les recommandations →
+                      View all recommendations →
                     </a>
                   </div>
                 </div>
@@ -776,26 +770,27 @@
             showDefaultInsights();
           }
         } catch (error) {
-          console.log("Erreur lors du chargement des insights AI:", error);
+          console.log("Error loading AI insights:", error);
           showDefaultInsights();
         }
       }
 
       function showDefaultInsights() {
-        // Afficher des valeurs par défaut en cas d'erreur
+        // Display default values in case of error
         document.getElementById("security-score").textContent = "--";
         document.getElementById("security-level").textContent = "N/A";
         document.getElementById("trend-direction").textContent = "--";
         document.getElementById("trend-details").textContent =
-          "Données insuffisantes";
+          "Insufficient data";
         document.getElementById("suspicious-count").textContent = "0";
         document.getElementById("top-objects-list").innerHTML =
-          '<p class="text-muted">Effectuez des détections pour voir les statistiques</p>';
+          '<p class="text-muted">Perform detections to view statistics</p>';
         document.getElementById("ai-recommendation").innerHTML =
-          '<p class="text-muted">Les recommandations IA apparaîtront après vos premières détections</p>';
+          '<p class="text-muted">AI recommendations will appear after your first detections</p>';
       }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
+
