@@ -108,24 +108,24 @@
 {% endblock %} {% block content %}
 <div class="card">
   <h2 style="margin-bottom: 1rem; color: #667eea">
-    🎥 Détection en Temps Réel
+    🎥 Real-Time Detection
   </h2>
 
   <div class="video-container" id="videoContainer">
     <img
       id="videoFeed"
       src="{% url 'mouvment_detection:video_feed' %}"
-      alt="Flux vidéo"
+      alt="Video feed"
       style="display: none"
     />
     <div class="loading">
-      <p>⏳ Chargement de la caméra...</p>
+      <p>⏳ Loading camera...</p>
     </div>
   </div>
 
   <div class="controls">
     <button class="btn btn-success" onclick="startDetection()" id="startBtn">
-      ▶️ Démarrer la Détection
+      ▶️ Start Detection
     </button>
     <button
       class="btn btn-danger"
@@ -133,7 +133,7 @@
       id="stopBtn"
       style="display: none"
     >
-      ⏹️ Arrêter la Détection
+      ⏹️ Stop Detection
     </button>
   </div>
 
@@ -148,7 +148,7 @@
         />
         <span class="slider"></span>
       </label>
-      <label for="motionToggle">Détection de mouvement</label>
+      <label for="motionToggle">Motion detection</label>
     </div>
 
     <div>
@@ -161,40 +161,40 @@
         />
         <span class="slider"></span>
       </label>
-      <label for="faceToggle">Détection de visages</label>
+      <label for="faceToggle">Face detection</label>
     </div>
   </div>
 </div>
 
 <div class="status-panel">
   <div class="status-card">
-    <h3>État du Système</h3>
+    <h3>System Status</h3>
     <div class="value" id="systemStatus">
       <span class="status-indicator status-inactive"></span>
-      Arrêté
+      Stopped
     </div>
   </div>
 
   <div class="status-card">
-    <h3>Mouvement Détecté</h3>
-    <div class="value" id="motionStatus">❌ Non</div>
+    <h3>Motion Detected</h3>
+    <div class="value" id="motionStatus">❌ No</div>
   </div>
 
   <div class="status-card">
-    <h3>Visages Détectés</h3>
+    <h3>Faces Detected</h3>
     <div class="value" id="facesCount">0</div>
   </div>
 
   <div class="status-card">
-    <h3>Intensité du Mouvement</h3>
+    <h3>Motion Intensity</h3>
     <div class="value" id="motionIntensity">0%</div>
   </div>
 </div>
 
 <div class="card" style="margin-top: 2rem">
-  <h3 style="margin-bottom: 1rem; color: #667eea">📋 Derniers Événements</h3>
+  <h3 style="margin-bottom: 1rem; color: #667eea">📋 Recent Events</h3>
   <div id="recentEvents">
-    <p style="color: #666">Aucun événement récent</p>
+    <p style="color: #666">No recent events</p>
   </div>
 </div>
 {% endblock %} {% block extra_js %}
@@ -202,14 +202,14 @@
   let statusInterval = null;
   let eventsInterval = null;
 
-  // Charger l'image vidéo après un court délai
+  // Load video image after a short delay
   window.addEventListener("load", function () {
     setTimeout(function () {
       document.getElementById("videoFeed").style.display = "block";
       document.querySelector(".loading").style.display = "none";
     }, 1000);
 
-    // Vérifier le statut initial
+    // Check initial status
     checkStatus();
     loadRecentEvents();
   });
@@ -224,17 +224,17 @@
           document.getElementById("startBtn").style.display = "none";
           document.getElementById("stopBtn").style.display = "inline-block";
 
-          // Démarrer la mise à jour du statut
+          // Start status update
           statusInterval = setInterval(checkStatus, 1000);
           eventsInterval = setInterval(loadRecentEvents, 5000);
 
-          showAlert("Détection démarrée avec succès!", "success");
+          showAlert("Detection started successfully!", "success");
         } else {
-          showAlert("Erreur: " + data.message, "danger");
+          showAlert("Error: " + data.message, "danger");
         }
       })
       .catch((error) => {
-        showAlert("Erreur de connexion: " + error, "danger");
+        showAlert("Connection error: " + error, "danger");
       });
   }
 
@@ -247,7 +247,7 @@
         document.getElementById("startBtn").style.display = "inline-block";
         document.getElementById("stopBtn").style.display = "none";
 
-        // Arrêter les mises à jour
+        // Stop updates
         if (statusInterval) clearInterval(statusInterval);
         if (eventsInterval) clearInterval(eventsInterval);
 
@@ -258,10 +258,10 @@
           motion_intensity: 0,
         });
 
-        showAlert("Détection arrêtée", "info");
+        showAlert("Detection stopped", "info");
       })
       .catch((error) => {
-        showAlert("Erreur: " + error, "danger");
+        showAlert("Error: " + error, "danger");
       });
   }
 
@@ -272,16 +272,16 @@
         updateStatusDisplay(data);
       })
       .catch((error) => {
-        console.error("Erreur lors de la vérification du statut:", error);
+        console.error("Error checking status:", error);
       });
   }
 
   function updateStatusDisplay(data) {
-    // État du système
+    // System status
     const systemStatus = document.getElementById("systemStatus");
     if (data.is_running) {
       systemStatus.innerHTML =
-        '<span class="status-indicator status-active"></span> Actif';
+        '<span class="status-indicator status-active"></span> Active';
       document.getElementById("startBtn").style.display = "none";
       document.getElementById("stopBtn").style.display = "inline-block";
 
@@ -291,19 +291,19 @@
       }
     } else {
       systemStatus.innerHTML =
-        '<span class="status-indicator status-inactive"></span> Arrêté';
+        '<span class="status-indicator status-inactive"></span> Stopped';
     }
 
-    // Mouvement
+    // Motion
     document.getElementById("motionStatus").textContent = data.motion_detected
-      ? "✅ Oui"
-      : "❌ Non";
+      ? "✅ Yes"
+      : "❌ No";
 
-    // Visages
+    // Faces
     document.getElementById("facesCount").textContent =
       data.faces_detected || 0;
 
-    // Intensité
+    // Intensity
     const intensity = Math.round((data.motion_intensity || 0) * 100);
     document.getElementById("motionIntensity").textContent = intensity + "%";
   }
@@ -323,11 +323,11 @@
       .then((response) => response.json())
       .then((data) => {
         if (data.status === "success") {
-          showAlert("Paramètres mis à jour", "success");
+          showAlert("Settings updated", "success");
         }
       })
       .catch((error) => {
-        console.error("Erreur:", error);
+        console.error("Error:", error);
       });
   }
 
@@ -341,9 +341,9 @@
           let html = '<table style="width: 100%; border-collapse: collapse;">';
           html += '<tr style="background: #f7fafc; font-weight: bold;">';
           html += '<td style="padding: 0.5rem;">Type</td>';
-          html += '<td style="padding: 0.5rem;">Heure</td>';
-          html += '<td style="padding: 0.5rem;">Visages</td>';
-          html += '<td style="padding: 0.5rem;">Intensité</td>';
+          html += '<td style="padding: 0.5rem;">Time</td>';
+          html += '<td style="padding: 0.5rem;">Faces</td>';
+          html += '<td style="padding: 0.5rem;">Intensity</td>';
           html += "</tr>";
 
           data.events.forEach((event) => {
@@ -351,7 +351,7 @@
             html += `<td style="padding: 0.5rem;">${event.detection_type}</td>`;
             html += `<td style="padding: 0.5rem;">${new Date(
               event.timestamp
-            ).toLocaleString("fr-FR")}</td>`;
+            ).toLocaleString("en-US")}</td>`;
             html += `<td style="padding: 0.5rem;">${event.faces_count}</td>`;
             html += `<td style="padding: 0.5rem;">${Math.round(
               event.motion_intensity * 100
@@ -363,7 +363,7 @@
           container.innerHTML = html;
         } else {
           container.innerHTML =
-            '<p style="color: #666;">Aucun événement récent</p>';
+            '<p style="color: #666;">No recent events</p>';
         }
       })
       .catch((error) => {

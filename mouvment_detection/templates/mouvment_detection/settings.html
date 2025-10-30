@@ -1,7 +1,7 @@
 {% extends 'mouvment_detection/base.html' %} {% block content %}
 <div class="card">
   <h2 style="margin-bottom: 1.5rem; color: #667eea">
-    ⚙️ Paramètres de Détection
+    ⚙️ Detection Settings
   </h2>
 
   <form method="post">
@@ -9,7 +9,7 @@
 
     <div style="margin-bottom: 1.5rem">
       <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
-        >Nom de la Configuration</label
+        >Configuration Name</label
       >
       <input
         type="text"
@@ -26,7 +26,7 @@
 
     <div style="margin-bottom: 1.5rem">
       <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
-        >Index de la Caméra</label
+        >Camera Index</label
       >
       <input
         type="number"
@@ -42,7 +42,7 @@
         "
       />
       <small style="color: #666"
-        >0 = caméra par défaut, 1 = deuxième caméra, etc.</small
+        >0 = default camera, 1 = second camera, etc.</small
       >
     </div>
 
@@ -63,7 +63,7 @@
           endif
           %}
         />
-        <span style="font-weight: 600">Activer la détection de mouvement</span>
+        <span style="font-weight: 600">Enable motion detection</span>
       </label>
     </div>
 
@@ -84,12 +84,12 @@
           endif
           %}
         />
-        <span style="font-weight: 600">Activer la détection de visages</span>
+        <span style="font-weight: 600">Enable face detection</span>
       </label>
     </div>
     <div style="margin-bottom: 1.5rem">
       <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
-        >Seuil de Mouvement</label
+        >Motion Threshold</label
       >
       <input
         type="range"
@@ -109,18 +109,18 @@
           font-size: 0.875rem;
         "
       >
-        <span>Sensible (5)</span>
+        <span>Sensitive (5)</span>
         <span id="thresholdValue"
           >{% if settings %}{{ settings.motion_threshold }}{% else %}25{% endif
           %}</span
         >
-        <span>Moins sensible (50)</span>
+        <span>Less sensitive (50)</span>
       </div>
     </div>
 
     <div style="margin-bottom: 1.5rem">
       <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
-        >Surface Minimale du Contour</label
+        >Minimum Contour Area</label
       >
       <input
         type="number"
@@ -137,7 +137,7 @@
         "
       />
       <small style="color: #666"
-        >Ignorer les mouvements plus petits que cette valeur (en pixels)</small
+        >Ignore motions smaller than this value (in pixels)</small
       >
     </div>
 
@@ -159,14 +159,14 @@
           %}
         />
         <span style="font-weight: 600"
-          >Sauvegarder les images lors des détections</span
+          >Save images during detections</span
         >
       </label>
     </div>
 
     <div style="margin-bottom: 1.5rem">
       <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
-        >Intervalle de Détection (secondes)</label
+        >Detection Interval (seconds)</label
       >
       <input
         type="number"
@@ -182,37 +182,37 @@
         "
       />
       <small style="color: #666"
-        >Temps minimum entre deux enregistrements de détection</small
+        >Minimum time between two detection recordings</small
       >
     </div>
 
     <div style="display: flex; gap: 1rem">
-      <button type="submit" class="btn btn-success">💾 Sauvegarder</button>
+      <button type="submit" class="btn btn-success">💾 Save</button>
       <a href="{% url 'mouvment_detection:index' %}" class="btn btn-primary"
-        >↩️ Retour</a
+        >↩️ Back</a
       >
     </div>
   </form>
 </div>
 
 <div class="card">
-  <h3 style="margin-bottom: 1rem; color: #667eea">ℹ️ Informations</h3>
+  <h3 style="margin-bottom: 1rem; color: #667eea">ℹ️ Information</h3>
   <ul style="line-height: 2; color: #666">
     <li>
-      <strong>Détection de mouvement :</strong> Utilise la différence entre les
-      frames pour détecter les mouvements
+      <strong>Motion detection:</strong> Uses frame difference to detect
+      movements
     </li>
     <li>
-      <strong>Détection de visages :</strong> Utilise Haar Cascade (inclus avec
-      OpenCV, 100% gratuit et local)
+      <strong>Face detection:</strong> Uses Haar Cascade (included with
+      OpenCV, 100% free and local)
     </li>
     <li>
-      <strong>Seuil de mouvement :</strong> Plus la valeur est faible, plus la
-      détection est sensible
+      <strong>Motion threshold:</strong> Lower value means more sensitive
+      detection
     </li>
     <li>
-      <strong>Surface minimale :</strong> Permet d'ignorer les petits mouvements
-      (bruit, ombres)
+      <strong>Minimum area:</strong> Helps ignore small movements
+      (noise, shadows)
     </li>
   </ul>
 </div>
