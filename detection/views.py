@@ -379,3 +379,22 @@ def security_logs(request):
     }
     return render(request, 'detection/security_logs.html', context)
 
+
+@login_required
+@require_http_methods(["POST"])
+def delete_security_logs(request):
+    """
+    Delete all security detection logs
+    """
+    log_file = 'media/security/detection_log.json'
+    
+    try:
+        # Clear the log file by writing empty array
+        with open(log_file, 'w') as f:
+            json.dump([], f)
+        
+        messages.success(request, 'All security logs have been deleted successfully.')
+    except (IOError, OSError) as e:
+        messages.error(request, f'Failed to delete logs: {str(e)}')
+    
+    return redirect('detection:security_logs')
