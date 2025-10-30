@@ -1,1 +1,36 @@
+<<<<<<< HEAD
+[
+  {
+    "timestamp": "2025-10-30T18:01:55.198514",
+    "detection_count": 2,
+    "detections": [
+      {
+        "class": "truck",
+        "confidence": 0.5991607308387756,
+        "bbox": {
+          "xmin": 151,
+          "ymin": 145,
+          "xmax": 182,
+          "ymax": 183
+        },
+        "timestamp": "2025-10-30T18:01:55.195851"
+      },
+      {
+        "class": "truck",
+        "confidence": 0.5710506439208984,
+        "bbox": {
+          "xmin": 182,
+          "ymin": 167,
+          "xmax": 238,
+          "ymax": 216
+        },
+        "timestamp": "2025-10-30T18:01:55.195986"
+      }
+    ],
+    "snapshot": null,
+    "camera_source": "https://ITSStreamingBR2.dotd.la.gov/public/shr-cam-030.streams/playlist.m3u8"
+  }
+]
+=======
 []
+>>>>>>> 270c3f1c187668bb982eae941ec3b630aec24b2a
