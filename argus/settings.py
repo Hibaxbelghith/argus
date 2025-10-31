@@ -1,6 +1,7 @@
 # CSRF trusted origins for ngrok
 CSRF_TRUSTED_ORIGINS = [
     'https://*.ngrok-free.app',
+    'https://*.ngrok-free.dev',
 ]
 """
 Django settings for argus project.
@@ -33,6 +34,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.ngrok-free.app',
+    '.ngrok-free.dev',
 ]
 
 
@@ -52,7 +54,11 @@ INSTALLED_APPS = [
     'emotion',
     'analytics',  # Module Analytics de Détection
     'notifications',  # Module Notifications Intelligentes
+    'mouvment_detection',
 ]
+
+# Custom user model
+AUTH_USER_MODEL = 'authentication.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'authentication.middleware.LimitFaceLoginMiddleware',  # Notre middleware de limitation des tentatives faciales
 ]
 
 ROOT_URLCONF = 'argus.urls'
@@ -147,6 +154,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Sécurité renforcée
+SESSION_COOKIE_AGE = 3600  # 1 heure
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
 
 # Sécurité : headers recommandés en prod
 SECURE_CONTENT_TYPE_NOSNIFF = True

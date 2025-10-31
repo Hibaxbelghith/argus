@@ -1,0 +1,228 @@
+{% extends 'mouvment_detection/base.html' %} {% block content %}
+<div class="card">
+  <h2 style="margin-bottom: 1.5rem; color: #667eea">
+    ⚙️ Detection Settings
+  </h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div style="margin-bottom: 1.5rem">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
+        >Configuration Name</label
+      >
+      <input
+        type="text"
+        name="name"
+        value="{% if settings %}{{ settings.name }}{% else %}Default{% endif %}"
+        style="
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+        "
+      />
+    </div>
+
+    <div style="margin-bottom: 1.5rem">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
+        >Camera Index</label
+      >
+      <input
+        type="number"
+        name="camera_index"
+        value="{% if settings %}{{ settings.camera_index }}{% else %}0{% endif %}"
+        min="0"
+        max="10"
+        style="
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+        "
+      />
+      <small style="color: #666"
+        >0 = default camera, 1 = second camera, etc.</small
+      >
+    </div>
+
+    <div style="margin-bottom: 1.5rem">
+      <label
+        style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer"
+      >
+        <input
+          type="checkbox"
+          name="enable_motion"
+          {%
+          if
+          not
+          settings
+          or
+          settings.enable_motion_detection
+          %}checked{%
+          endif
+          %}
+        />
+        <span style="font-weight: 600">Enable motion detection</span>
+      </label>
+    </div>
+
+    <div style="margin-bottom: 1.5rem">
+      <label
+        style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer"
+      >
+        <input
+          type="checkbox"
+          name="enable_face"
+          {%
+          if
+          not
+          settings
+          or
+          settings.enable_face_detection
+          %}checked{%
+          endif
+          %}
+        />
+        <span style="font-weight: 600">Enable face detection</span>
+      </label>
+    </div>
+    <div style="margin-bottom: 1.5rem">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
+        >Motion Threshold</label
+      >
+      <input
+        type="range"
+        name="motion_threshold"
+        value="{% if settings %}{{ settings.motion_threshold }}{% else %}25{% endif %}"
+        min="5"
+        max="50"
+        step="5"
+        id="motionThreshold"
+        style="width: 100%"
+      />
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          color: #666;
+          font-size: 0.875rem;
+        "
+      >
+        <span>Sensitive (5)</span>
+        <span id="thresholdValue"
+          >{% if settings %}{{ settings.motion_threshold }}{% else %}25{% endif
+          %}</span
+        >
+        <span>Less sensitive (50)</span>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 1.5rem">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
+        >Minimum Contour Area</label
+      >
+      <input
+        type="number"
+        name="min_contour_area"
+        value="{% if settings %}{{ settings.min_contour_area }}{% else %}500{% endif %}"
+        min="100"
+        max="5000"
+        step="100"
+        style="
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+        "
+      />
+      <small style="color: #666"
+        >Ignore motions smaller than this value (in pixels)</small
+      >
+    </div>
+
+    <div style="margin-bottom: 1.5rem">
+      <label
+        style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer"
+      >
+        <input
+          type="checkbox"
+          name="save_images"
+          {%
+          if
+          not
+          settings
+          or
+          settings.save_images
+          %}checked{%
+          endif
+          %}
+        />
+        <span style="font-weight: 600"
+          >Save images during detections</span
+        >
+      </label>
+    </div>
+
+    <div style="margin-bottom: 1.5rem">
+      <label style="display: block; margin-bottom: 0.5rem; font-weight: 600"
+        >Detection Interval (seconds)</label
+      >
+      <input
+        type="number"
+        name="detection_interval"
+        value="{% if settings %}{{ settings.detection_interval }}{% else %}1{% endif %}"
+        min="1"
+        max="60"
+        style="
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+        "
+      />
+      <small style="color: #666"
+        >Minimum time between two detection recordings</small
+      >
+    </div>
+
+    <div style="display: flex; gap: 1rem">
+      <button type="submit" class="btn btn-success">💾 Save</button>
+      <a href="{% url 'mouvment_detection:index' %}" class="btn btn-primary"
+        >↩️ Back</a
+      >
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin-bottom: 1rem; color: #667eea">ℹ️ Information</h3>
+  <ul style="line-height: 2; color: #666">
+    <li>
+      <strong>Motion detection:</strong> Uses frame difference to detect
+      movements
+    </li>
+    <li>
+      <strong>Face detection:</strong> Uses Haar Cascade (included with
+      OpenCV, 100% free and local)
+    </li>
+    <li>
+      <strong>Motion threshold:</strong> Lower value means more sensitive
+      detection
+    </li>
+    <li>
+      <strong>Minimum area:</strong> Helps ignore small movements
+      (noise, shadows)
+    </li>
+  </ul>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  const slider = document.getElementById("motionThreshold");
+  const output = document.getElementById("thresholdValue");
+
+  slider.addEventListener("input", function () {
+    output.textContent = this.value;
+  });
+</script>
+{% endblock %}

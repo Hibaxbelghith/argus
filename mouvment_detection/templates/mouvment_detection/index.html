@@ -1,0 +1,387 @@
+{% extends 'mouvment_detection/base.html' %} {% block extra_css %}
+<style>
+  .video-container {
+    position: relative;
+    background: #000;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .video-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .status-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .status-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .status-card h3 {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+  }
+
+  .status-card .value {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+  .toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #48bb78;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+
+  .loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="card">
+  <h2 style="margin-bottom: 1rem; color: #667eea">
+    🎥 Real-Time Detection
+  </h2>
+
+  <div class="video-container" id="videoContainer">
+    <img
+      id="videoFeed"
+      src="{% url 'mouvment_detection:video_feed' %}"
+      alt="Video feed"
+      style="display: none"
+    />
+    <div class="loading">
+      <p>⏳ Loading camera...</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-success" onclick="startDetection()" id="startBtn">
+      ▶️ Start Detection
+    </button>
+    <button
+      class="btn btn-danger"
+      onclick="stopDetection()"
+      id="stopBtn"
+      style="display: none"
+    >
+      ⏹️ Stop Detection
+    </button>
+  </div>
+
+  <div class="toggle-switch">
+    <div>
+      <label class="switch">
+        <input
+          type="checkbox"
+          id="motionToggle"
+          checked
+          onchange="updateSettings()"
+        />
+        <span class="slider"></span>
+      </label>
+      <label for="motionToggle">Motion detection</label>
+    </div>
+
+    <div>
+      <label class="switch">
+        <input
+          type="checkbox"
+          id="faceToggle"
+          checked
+          onchange="updateSettings()"
+        />
+        <span class="slider"></span>
+      </label>
+      <label for="faceToggle">Face detection</label>
+    </div>
+  </div>
+</div>
+
+<div class="status-panel">
+  <div class="status-card">
+    <h3>System Status</h3>
+    <div class="value" id="systemStatus">
+      <span class="status-indicator status-inactive"></span>
+      Stopped
+    </div>
+  </div>
+
+  <div class="status-card">
+    <h3>Motion Detected</h3>
+    <div class="value" id="motionStatus">❌ No</div>
+  </div>
+
+  <div class="status-card">
+    <h3>Faces Detected</h3>
+    <div class="value" id="facesCount">0</div>
+  </div>
+
+  <div class="status-card">
+    <h3>Motion Intensity</h3>
+    <div class="value" id="motionIntensity">0%</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top: 2rem">
+  <h3 style="margin-bottom: 1rem; color: #667eea">📋 Recent Events</h3>
+  <div id="recentEvents">
+    <p style="color: #666">No recent events</p>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  let statusInterval = null;
+  let eventsInterval = null;
+
+  // Load video image after a short delay
+  window.addEventListener("load", function () {
+    setTimeout(function () {
+      document.getElementById("videoFeed").style.display = "block";
+      document.querySelector(".loading").style.display = "none";
+    }, 1000);
+
+    // Check initial status
+    checkStatus();
+    loadRecentEvents();
+  });
+
+  function startDetection() {
+    fetch('{% url "mouvment_detection:start_detection" %}', {
+      method: "POST",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          document.getElementById("startBtn").style.display = "none";
+          document.getElementById("stopBtn").style.display = "inline-block";
+
+          // Start status update
+          statusInterval = setInterval(checkStatus, 1000);
+          eventsInterval = setInterval(loadRecentEvents, 5000);
+
+          showAlert("Detection started successfully!", "success");
+        } else {
+          showAlert("Error: " + data.message, "danger");
+        }
+      })
+      .catch((error) => {
+        showAlert("Connection error: " + error, "danger");
+      });
+  }
+
+  function stopDetection() {
+    fetch('{% url "mouvment_detection:stop_detection" %}', {
+      method: "POST",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById("startBtn").style.display = "inline-block";
+        document.getElementById("stopBtn").style.display = "none";
+
+        // Stop updates
+        if (statusInterval) clearInterval(statusInterval);
+        if (eventsInterval) clearInterval(eventsInterval);
+
+        updateStatusDisplay({
+          is_running: false,
+          motion_detected: false,
+          faces_detected: 0,
+          motion_intensity: 0,
+        });
+
+        showAlert("Detection stopped", "info");
+      })
+      .catch((error) => {
+        showAlert("Error: " + error, "danger");
+      });
+  }
+
+  function checkStatus() {
+    fetch('{% url "mouvment_detection:detection_status" %}')
+      .then((response) => response.json())
+      .then((data) => {
+        updateStatusDisplay(data);
+      })
+      .catch((error) => {
+        console.error("Error checking status:", error);
+      });
+  }
+
+  function updateStatusDisplay(data) {
+    // System status
+    const systemStatus = document.getElementById("systemStatus");
+    if (data.is_running) {
+      systemStatus.innerHTML =
+        '<span class="status-indicator status-active"></span> Active';
+      document.getElementById("startBtn").style.display = "none";
+      document.getElementById("stopBtn").style.display = "inline-block";
+
+      if (!statusInterval) {
+        statusInterval = setInterval(checkStatus, 1000);
+        eventsInterval = setInterval(loadRecentEvents, 5000);
+      }
+    } else {
+      systemStatus.innerHTML =
+        '<span class="status-indicator status-inactive"></span> Stopped';
+    }
+
+    // Motion
+    document.getElementById("motionStatus").textContent = data.motion_detected
+      ? "✅ Yes"
+      : "❌ No";
+
+    // Faces
+    document.getElementById("facesCount").textContent =
+      data.faces_detected || 0;
+
+    // Intensity
+    const intensity = Math.round((data.motion_intensity || 0) * 100);
+    document.getElementById("motionIntensity").textContent = intensity + "%";
+  }
+
+  function updateSettings() {
+    const enableMotion = document.getElementById("motionToggle").checked;
+    const enableFace = document.getElementById("faceToggle").checked;
+
+    const formData = new FormData();
+    formData.append("enable_motion", enableMotion);
+    formData.append("enable_face", enableFace);
+
+    fetch('{% url "mouvment_detection:update_settings" %}', {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          showAlert("Settings updated", "success");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+
+  function loadRecentEvents() {
+    fetch('{% url "mouvment_detection:events_api" %}?limit=5')
+      .then((response) => response.json())
+      .then((data) => {
+        const container = document.getElementById("recentEvents");
+
+        if (data.events && data.events.length > 0) {
+          let html = '<table style="width: 100%; border-collapse: collapse;">';
+          html += '<tr style="background: #f7fafc; font-weight: bold;">';
+          html += '<td style="padding: 0.5rem;">Type</td>';
+          html += '<td style="padding: 0.5rem;">Time</td>';
+          html += '<td style="padding: 0.5rem;">Faces</td>';
+          html += '<td style="padding: 0.5rem;">Intensity</td>';
+          html += "</tr>";
+
+          data.events.forEach((event) => {
+            html += '<tr style="border-bottom: 1px solid #e2e8f0;">';
+            html += `<td style="padding: 0.5rem;">${event.detection_type}</td>`;
+            html += `<td style="padding: 0.5rem;">${new Date(
+              event.timestamp
+            ).toLocaleString("en-US")}</td>`;
+            html += `<td style="padding: 0.5rem;">${event.faces_count}</td>`;
+            html += `<td style="padding: 0.5rem;">${Math.round(
+              event.motion_intensity * 100
+            )}%</td>`;
+            html += "</tr>";
+          });
+
+          html += "</table>";
+          container.innerHTML = html;
+        } else {
+          container.innerHTML =
+            '<p style="color: #666;">No recent events</p>';
+        }
+      })
+      .catch((error) => {
+        console.error("Erreur:", error);
+      });
+  }
+
+  function showAlert(message, type) {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+
+    const container = document.querySelector(".container");
+    container.insertBefore(alertDiv, container.firstChild);
+
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 3000);
+  }
+</script>
+{% endblock %}

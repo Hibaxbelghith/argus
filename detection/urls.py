@@ -9,6 +9,7 @@ urlpatterns = [
     path('process/<int:pk>/', views.process_detection, name='process'),
     path('result/<int:pk>/', views.detection_result, name='result'),
     path('history/', views.detection_history, name='history'),
+    path('edit/<int:pk>/', views.edit_detection, name='edit'),
     path('delete/<int:pk>/', views.delete_detection, name='delete'),
     
     # Real-time security monitoring endpoints
@@ -18,4 +19,5 @@ urlpatterns = [
     path('security/feed/', views.video_feed, name='video_feed'),
     path('security/detections/', views.get_detections_data, name='get_detections'),
     path('security/logs/', views.security_logs, name='security_logs'),
+    path('security/logs/delete/', views.delete_security_logs, name='delete_logs'),
 ]

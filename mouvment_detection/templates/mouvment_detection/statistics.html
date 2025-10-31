@@ -1,0 +1,99 @@
+{% extends 'mouvment_detection/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-bottom: 1.5rem; color: #667eea;">📊 Detection Statistics</h2>
+
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Total Events</h3>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_events }}</div>
+        </div>
+
+        <div
+            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Motion Detections</h3>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ motion_events }}</div>
+        </div>
+
+        <div
+            style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Face Detections</h3>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ face_events }}</div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+        <div
+            style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Motion + Face</h3>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ both_events }}</div>
+        </div>
+
+        <div
+            style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Last 24h</h3>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ recent_events }}</div>
+        </div>
+
+        <div
+            style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Average Faces</h3>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ avg_faces }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 1rem; color: #667eea;">📈 Detection Distribution</h3>
+
+    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 2rem;">
+        <div style="text-align: center;">
+            <div
+                style="width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; position: relative;">
+                <div
+                    style="width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem;">
+                    {% if total_events > 0 %}
+                    {% widthratio motion_events total_events 100 %}%
+                    {% else %}
+                    0%
+                    {% endif %}
+                </div>
+            </div>
+            <p style="margin-top: 1rem; font-weight: 600;">Motions</p>
+        </div>
+
+        <div style="text-align: center;">
+            <div
+                style="width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); display: flex; align-items: center; justify-content: center;">
+                <div
+                    style="width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem;">
+                    {% if total_events > 0 %}
+                    {% widthratio face_events total_events 100 %}%
+                    {% else %}
+                    0%
+                    {% endif %}
+                </div>
+            </div>
+            <p style="margin-top: 1rem; font-weight: 600;">Faces</p>
+        </div>
+
+        <div style="text-align: center;">
+            <div
+                style="width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); display: flex; align-items: center; justify-content: center;">
+                <div
+                    style="width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem;">
+                    {% if total_events > 0 %}
+                    {% widthratio both_events total_events 100 %}%
+                    {% else %}
+                    0%
+                    {% endif %}
+                </div>
+            </div>
+            <p style="margin-top: 1rem; font-weight: 600;">Both</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

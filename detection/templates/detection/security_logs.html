@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #fff;
             padding: 20px 0;
@@ -20,49 +20,88 @@
             margin: 0 auto;
         }
         .card {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: none;
             border-radius: 15px;
             margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
         .card-header {
-            background: linear-gradient(135deg, #e94560 0%, #c81e3d 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-radius: 15px 15px 0 0 !important;
             padding: 15px 20px;
         }
+        .card-body {
+            color: #333;
+        }
         .log-entry {
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 3px solid #e94560;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 5px;
+            color: #333;
         }
         .log-entry.person-detected {
-            border-left-color: #ff6b6b;
-            background: rgba(255, 107, 107, 0.1);
+            border-left-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+        .log-entry strong {
+            color: #667eea;
         }
         .navbar-custom {
-            background: rgba(26, 26, 46, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
             border-radius: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             padding: 15px 20px;
+            animation: fadeInUp 0.5s ease-out;
         }
+        
+        .navbar-custom .nav-link {
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-custom .nav-link:hover {
+            color: #667eea;
+        }
+        
+        .navbar-custom .navbar-brand {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.3rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .navbar-custom .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+        
         .badge-detection {
-            background: linear-gradient(135deg, #e94560 0%, #c81e3d 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 5px 12px;
             border-radius: 15px;
+            color: white;
+        }
+        h1, h2, h3, h4, h5 {
+            color: #333;
+        }
+        .text-muted {
+            color: #666 !important;
         }
     </style>
 </head>
 <body>
     <div class="main-container">
         <!-- Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="/">
+                <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
                     <i class="bi bi-shield-shaded"></i> Argus Security
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -97,11 +136,20 @@
 
         <!-- Logs -->
         <div class="card">
-            <div class="card-header">
-                <h2 class="mb-0">
-                    <i class="bi bi-journal-text"></i> Security Detection Logs
-                </h2>
-                <p class="mb-0 mt-2">Total Events: {{ total_logs }}</p>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="bi bi-journal-text"></i> Security Detection Logs
+                    </h2>
+                    <p class="mb-0 mt-2">Total Events: {{ total_logs }}</p>
+                </div>
+                {% if logs %}
+                <div>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLogsModal">
+                        <i class="bi bi-trash"></i> Delete All Logs
+                    </button>
+                </div>
+                {% endif %}
             </div>
             <div class="card-body">
                 {% if logs %}
@@ -155,6 +203,38 @@
                         </a>
                     </div>
                 {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteLogsModal" tabindex="-1" aria-labelledby="deleteLogsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteLogsModalLabel">
+                        <i class="bi bi-exclamation-triangle"></i> Confirm Deletion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-dark mb-3">Are you sure you want to delete all security logs?</p>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-circle"></i> 
+                        <strong>Warning:</strong> This action cannot be undone. All {{ total_logs }} log entries will be permanently deleted.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <form method="post" action="{% url 'detection:delete_logs' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Yes, Delete All
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

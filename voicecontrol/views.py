@@ -7,9 +7,14 @@ import sounddevice as sd
 import difflib
 import json
 import os
+
 from django.conf import settings
 from django.core.files.storage import default_storage
 from .models import VoiceCommand
+
+# Load spaCy model once
+import spacy
+nlp = spacy.load("en_core_web_md")
 
 def demo(request):
 	return render(request, 'voicecontrol/demo.html')
@@ -96,23 +101,54 @@ def voice_command(request):
 			response["action"] = ""
 		else:
 			response["recognized"] = command_text
-			text = command_text.lower()
+			# Normalize input: remove polite words and extra spaces
+			import re
+			def normalize(text):
+				text = text.lower()
+				# Remove polite/filler words/phrases
+				polite_patterns = [r"please ", r"can you ", r"could you ", r"would you ", r"kindly ", r"will you ", r"mate ", r"your "]
+				for pat in polite_patterns:
+					text = re.sub(pat, "", text)
+				return text.strip()
+
+			def lemmatize(text):
+				doc = nlp(text)
+				return " ".join([token.lemma_ for token in doc])
+
+			norm_text = normalize(command_text)
+			lemma_text = lemmatize(norm_text)
 			found = False
 
 			# Load commands from DB
 			commands = VoiceCommand.objects.filter(enabled=True)
+			# Prepare all phrases (main + synonyms) for semantic matching
+			candidates = []
 			for cmd_obj in commands:
-				cmd = cmd_obj.text.lower()
-				synonyms = [cmd] + [s.strip().lower() for s in cmd_obj.synonyms.split(',') if s.strip()]
-				for phrase in synonyms:
-					ratio = difflib.SequenceMatcher(None, phrase, text).ratio()
-					if ratio > 0.7 or phrase in text:
-						response["action"] = f"{cmd_obj.text.capitalize()} action triggered."
-						found = True
-						break
-				if found:
-					break
-			if not found:
+				cmd = normalize(cmd_obj.text)
+				candidates.append((cmd_obj.text, cmd))
+				synonyms = [normalize(s) for s in cmd_obj.synonyms.split(',') if s.strip()]
+				for syn in synonyms:
+					candidates.append((cmd_obj.text, syn))
+
+			# Use spaCy similarity to find best match
+			user_doc = nlp(lemma_text)
+			best_score = 0.0
+			best_action = None
+			import difflib
+			for action_text, candidate_phrase in candidates:
+				cand_doc = nlp(lemmatize(candidate_phrase))
+				score = user_doc.similarity(cand_doc)
+				# Also check fuzzy string similarity for borderline cases
+				fuzzy_score = difflib.SequenceMatcher(None, lemma_text, lemmatize(candidate_phrase)).ratio()
+				combined_score = max(score, fuzzy_score)
+				if combined_score > best_score:
+					best_score = combined_score
+					best_action = action_text
+
+			# Lower threshold for match (e.g. 0.75)
+			if best_score > 0.75:
+				response["action"] = f"{best_action.capitalize()} action triggered."
+			else:
 				response["action"] = "No valid command detected."
 		return JsonResponse(response)
 	return JsonResponse({"error": "Invalid request."}, status=400)

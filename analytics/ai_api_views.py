@@ -733,6 +733,9 @@ def api_list_saved_recommendations(request):
 
 @login_required
 @require_http_methods(["POST"])
+@login_required
+@require_http_methods(["POST"])
+@csrf_exempt
 def api_update_recommendation_status(request, rec_id):
     """
     POST /analytics/api/ai/recommendations/<id>/status/
